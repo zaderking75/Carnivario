@@ -4,7 +4,7 @@ package duocuc.cl.rodrigo.carniverocrud.controller;
 import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
-import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
+import duocuc.cl.rodrigo.carniverocrud.repository.Usuario;
 import duocuc.cl.rodrigo.carniverocrud.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

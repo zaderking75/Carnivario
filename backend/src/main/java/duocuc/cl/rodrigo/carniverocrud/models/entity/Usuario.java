@@ -1,18 +1,16 @@
-package duocuc.cl.rodrigo.carniverocrud.repository;
+package duocuc.cl.rodrigo.carniverocrud.models;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @Entity
-@Table(name="usuarios")
-public class UsuarioDB {
+@Table(name = "usuario")
+public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)

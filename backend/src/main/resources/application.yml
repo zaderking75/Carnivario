@@ -1,14 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./db/carniveroCrud;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-      settings:
-        web-allow-others: true
+    url: jdbc:mysql://localhost:3306/carnivario?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true
+    username: root
+    password: tu_password
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
     properties:
@@ -17,7 +12,7 @@ spring:
         format_sql: false
         hbm2ddl:
           auto: update
-        dialect: org.hibernate.dialect.H2Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
   sql:
     init:
