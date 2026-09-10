@@ -93,7 +93,7 @@ const AdminDashboard = () => {
                 imageUrl = uploadRes.data;
             }
             const plantaAGuardar = { ...newPlanta, image: imageUrl };
-            await PlantaService.registerPlanta(newPlanta);
+            await PlantaService.createPlanta(plantaAGuardar);
             alert("Planta creada con éxito");
             cargarPlantas();
             setNewPlanta({ name: "", price: "", description: "", image: "", stock: 10, planting: "", size: "" });

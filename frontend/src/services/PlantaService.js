@@ -1,4 +1,3 @@
-import axios from "axios";
 import api from "../api/axiosConfig";
 
 const API_BASE_URL = "/planta/api";
