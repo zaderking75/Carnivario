@@ -1,24 +1,20 @@
-package duocuc.cl.rodrigo.carniverocrud.models.entity;
+package duocuc.cl.rodrigo.carniverocrud.repository;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Entity
-@Table(name = "usuario")
-public class Usuario {
-    @Id 
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+@Table(name="usuarios")
+public class UsuarioDB {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Integer id;
     @Column(name = "name", nullable = false,length = 50)

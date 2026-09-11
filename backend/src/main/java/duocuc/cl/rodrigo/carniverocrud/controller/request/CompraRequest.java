@@ -1,4 +1,4 @@
-package duocuc.cl.rodrigo.carniverocrud.models.request;
+package duocuc.cl.rodrigo.carniverocrud.controller.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CompraRequest {
     private String idUser;
-    private String estado;
+    private Integer idPlanta;
+    private int quantity;
+
 }
-    

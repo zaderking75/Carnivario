@@ -1,15 +1,16 @@
-package duocuc.cl.rodrigo.carniverocrud.models.request;
+package duocuc.cl.rodrigo.carniverocrud.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@AllArgsConstructor
+import lombok.*;
+
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
-public class PlantaRequest {
+@ToString
+public class Planta {
+    private int id;
     private String name;
     private int price;
     private String image;
