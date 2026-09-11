@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/uploads/api")
+@RequestMapping({"/uploads/api", "/api/uploads"})
 @CrossOrigin(origins = "*")
 public class UploadController {
 

@@ -12,6 +12,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class CompraRequest {
     private String idUser;
+    private Integer idPlanta;
+    private Integer quantity;
     private String estado;
 }
     
