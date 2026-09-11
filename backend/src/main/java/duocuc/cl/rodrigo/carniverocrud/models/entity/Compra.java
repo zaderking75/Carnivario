@@ -1,4 +1,4 @@
-package duocuc.cl.rodrigo.carniverocrud.models;
+package duocuc.cl.rodrigo.carniverocrud.models.entity;
 
 import lombok.*;
 
@@ -14,22 +14,21 @@ import jakarta.persistence.Table;
 @Builder
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
 @ToString
 @Entity
 @Table(name = "compra")
 public class Compra {
   @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
-    @Column (name = "id_purchase", updatable = false, nullable = false)
-    private Integer id;
-    @Column(name = "id_user", nullable = false,length = 50)
-    private String idUser;
-    @Column(name = "purchase_date")
-    private LocalDateTime purchasedate;
-    public Compra() {
-        this.purchasedate = LocalDateTime.now();
-    }
-    @Column(name = "estado", nullable = false,length = 50)
-    private String estado;
+  @GeneratedValue (strategy = GenerationType.IDENTITY)
+  @Column (name = "id_purchase", updatable = false, nullable = false)
+  private Integer id;
+  @Column(name = "id_user", nullable = false,length = 50)
+  private String idUser;
+  @Column(name = "purchase_date")
+  private LocalDateTime purchasedate;
+  public Compra() {
+      this.purchasedate = LocalDateTime.now();
+  }
+  @Column(name = "estado", nullable = false,length = 50)
+  private String estado;
 }

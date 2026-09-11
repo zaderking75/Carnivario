@@ -1,5 +1,11 @@
-package duocuc.cl.rodrigo.carniverocrud.models;
+package duocuc.cl.rodrigo.carniverocrud.models.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.*;
 
 @Getter
@@ -11,8 +17,8 @@ import lombok.*;
 @Entity
 @Table(name = "usuario")
 public class Usuario {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id 
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Integer id;
     @Column(name = "name", nullable = false,length = 50)
