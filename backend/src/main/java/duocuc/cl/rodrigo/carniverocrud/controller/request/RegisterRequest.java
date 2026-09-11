@@ -1,4 +1,4 @@
-package duocuc.cl.rodrigo.carniverocrud.models.request;
+package duocuc.cl.rodrigo.carniverocrud.controller.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

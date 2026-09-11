@@ -1,5 +1,5 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
-import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,7 +18,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        UsuarioDB usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado con email: " + email));
 
         return new org.springframework.security.core.userdetails.User(

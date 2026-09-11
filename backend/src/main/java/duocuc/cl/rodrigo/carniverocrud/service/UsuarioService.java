@@ -1,9 +1,9 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
+import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
-import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
-import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
-import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
+import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -41,14 +41,14 @@ public class UsuarioService {
         // 3. Genera el JWT usando el email (Subject)
         return jwtProvider.generateToken(request.getEmail());
     }
-    public Usuario registrarUsuario(RegisterRequest request) {
+    public UsuarioDB registrarUsuario(RegisterRequest request) {
 
         if (usuarioJpaRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        // 1. Creamos la Entidad (Usuario) y mapeamos los campos
-        Usuario usuario = new Usuario();
+        // 1. Creamos la Entidad (UsuarioDB) y mapeamos los campos
+        UsuarioDB usuario = new UsuarioDB();
         usuario.setName(request.getName());
         usuario.setLastname(request.getLastname());
         usuario.setEmail(request.getEmail());
@@ -65,10 +65,10 @@ public class UsuarioService {
         return usuarioJpaRepository.save(usuario);
     }
 
-    public Usuario getUsuarioById(Integer id) {
+    public UsuarioDB getUsuarioById(Integer id) {
         return usuarioJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    public Usuario getUsuarioByEmail(String email) {
+    public UsuarioDB getUsuarioByEmail(String email) {
         return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email no encontrado"));
     }
 
