@@ -57,7 +57,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
-                        userDetails.getAuthorities() // Aquí irían los roles (ADMIN/USER)
+                        userDetails.getAuthorities()
                 );
 
                 // 7. Establecer detalles de la autenticación web

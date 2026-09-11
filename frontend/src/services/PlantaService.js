@@ -12,6 +12,10 @@ class PlantaService {
         return api.post(API_BASE_URL, planta);
     }
 
+    updatePlanta(id, planta) {
+        return api.put(`${API_BASE_URL}/${id}`, planta);
+    }
+
     deletePlanta(id) {
         return api.delete(`${API_BASE_URL}/${id}`);
     }

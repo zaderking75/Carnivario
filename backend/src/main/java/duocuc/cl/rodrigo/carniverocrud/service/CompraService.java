@@ -20,6 +20,10 @@ public class CompraService {
 
     @Transactional
     public CompraDB registerPurchase(CompraRequest request) {
+        if (request.getQuantity() <= 0) {
+            throw new RuntimeException("La cantidad debe ser mayor a 0");
+        }
+
         PlantaDB planta = plantaJpaRepository.findById(request.getIdPlanta())
                 .orElseThrow(() -> new RuntimeException("Planta no encontrada"));
         if (planta.getStock() < request.getQuantity()) {

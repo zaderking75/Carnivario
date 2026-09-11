@@ -25,6 +25,8 @@ public class PlantaController {
             PlantaDB plantaactualizada= plantaService.addstockplanta(stock,id);
             return ResponseEntity.ok(plantaactualizada);
 
+        }catch(IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -55,6 +57,17 @@ public class PlantaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updatePlanta(@PathVariable int id, @RequestBody PlantaRequest request) {
+        try {
+            PlantaDB planta = plantaService.updatePlanta(id, request);
+            return ResponseEntity.ok(planta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlanta(@PathVariable Integer id) {
         boolean deleted = plantaService.deletePlantaById(id);

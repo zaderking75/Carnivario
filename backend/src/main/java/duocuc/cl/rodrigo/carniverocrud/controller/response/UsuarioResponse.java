@@ -1,21 +1,19 @@
-package duocuc.cl.rodrigo.carniverocrud.controller.request;
+package duocuc.cl.rodrigo.carniverocrud.controller.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@AllArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-public class RegisterRequest {
+@AllArgsConstructor
+public class UsuarioResponse {
+    private Integer id;
     private String name;
     private String lastname;
     private String email;
-    private String password;
+    private String role;
     private String phone;
     private String address;
     private String commune;
-    private String role;
 }

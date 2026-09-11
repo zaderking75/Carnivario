@@ -20,8 +20,8 @@
         const response = await AuthService.login({email, password})
 
         const { token, user } = response.data;
-        localStorage.setItem("jwtToken", token);
-        AuthService.saveUser(user);
+        AuthService.saveSession(token, user);
+        const usuarioLogueado = AuthService.getCurrentUser();
 
 
 
@@ -29,7 +29,7 @@
         setError(false);
 
         setTimeout(() => {
-          if (user.role === "ADMIN") {
+          if (usuarioLogueado?.role === "ADMIN") {
             navigate("/admin");
           } else {
             navigate("/home");

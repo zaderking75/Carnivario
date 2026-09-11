@@ -3,7 +3,7 @@ package duocuc.cl.rodrigo.carniverocrud.controller;
 
 import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
-import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
+import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
 import duocuc.cl.rodrigo.carniverocrud.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,14 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -37,7 +36,7 @@ public class UserController {
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", jwtToken);
-            response.put("user", usuario);
+            response.put("user", mapToResponse(usuario));
             response.put("message", "Login exitoso");
             return ResponseEntity.ok(response);
 
@@ -50,14 +49,54 @@ public class UserController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDB> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             UsuarioDB nuevoUsuario = usuarioService.registrarUsuario(request);
-            return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+            return new ResponseEntity<>(mapToResponse(nuevoUsuario), HttpStatus.CREATED);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(null);
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    @GetMapping
+    public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {
+        List<UsuarioResponse> usuarios = usuarioService.getAllUsuarios().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(usuarios);
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createUsuario(@RequestBody RegisterRequest request) {
+        try {
+            UsuarioDB nuevoUsuario = usuarioService.registrarUsuario(request, request.getRole());
+            return new ResponseEntity<>(mapToResponse(nuevoUsuario), HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> cambiarRol(@PathVariable Integer id, @RequestBody Map<String, String> request) {
+        try {
+            UsuarioDB usuario = usuarioService.cambiarRol(id, request.get("role"));
+            return ResponseEntity.ok(mapToResponse(usuario));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    private UsuarioResponse mapToResponse(UsuarioDB usuario) {
+        return new UsuarioResponse(
+                usuario.getId(),
+                usuario.getName(),
+                usuario.getLastname(),
+                usuario.getEmail(),
+                usuario.getRole(),
+                usuario.getPhone(),
+                usuario.getAddress(),
+                usuario.getCommune()
+        );
+    }
 
 }
