@@ -104,6 +104,7 @@ public class CompraService {
         response.put("id", compra.getId());
         response.put("idCompra", compra.getId());
         response.put("idUser", compra.getIdUser());
+        response.put("purchasedate", compra.getPurchasedate());
         response.put("purchaseDate", compra.getPurchasedate());
         response.put("estado", compra.getEstado());
 
