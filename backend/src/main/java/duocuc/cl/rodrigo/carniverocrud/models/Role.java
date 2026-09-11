@@ -1,3 +1,7 @@
+package duocuc.cl.rodrigo.carniverocrud.models;
+import lombok.*;
+
+
 @Getter
 @Builder
 @Setter
