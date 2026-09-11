@@ -1,7 +1,7 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.PlantaRequest;
-import duocuc.cl.rodrigo.carniverocrud.repository.PlantaDB;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
+import duocuc.cl.rodrigo.carniverocrud.models.request.PlantaRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.PlantaJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,14 +18,15 @@ public class PlantaService {
         return plantaJpaRepository;
     }
 
-    public PlantaDB registerNewPlanta(PlantaRequest planta) {
+    public Planta registerNewPlanta(PlantaRequest planta) {
         validatePlanta(planta);
 
-        Optional<PlantaDB> plantabuscar=plantaJpaRepository.findByName(planta.getName());
-        if(plantabuscar.isPresent()) {
+        Optional<Planta> plantabuscar = plantaJpaRepository.findByName(planta.getName());
+        if (plantabuscar.isPresent()) {
             throw new RuntimeException("Planta ya existe");
         }
-        PlantaDB plantaDB = new PlantaDB();
+
+        Planta plantaDB = new Planta();
         plantaDB.setName(planta.getName());
         plantaDB.setPrice(planta.getPrice());
         plantaDB.setDescription(planta.getDescription());
@@ -35,12 +36,13 @@ public class PlantaService {
         plantaDB.setStock(planta.getStock());
         return plantaJpaRepository.save(plantaDB);
     }
-    public PlantaDB addstockplanta(int stock,int plantaid) {
+
+    public Planta addstockplanta(int stock, int plantaid) {
         if (stock == 0) {
             throw new IllegalArgumentException("La cantidad de ajuste no puede ser 0");
         }
 
-        PlantaDB planta = plantaJpaRepository.findById(plantaid)
+        Planta planta = plantaJpaRepository.findById(plantaid)
                 .orElseThrow(() -> new RuntimeException("Planta no encontrada con id: " + plantaid));
         int nuevoStock = planta.getStock() + stock;
         if (nuevoStock < 0) {
@@ -48,15 +50,14 @@ public class PlantaService {
         }
 
         planta.setStock(nuevoStock);
-
         return plantaJpaRepository.save(planta);
     }
 
-    public PlantaDB updatePlanta(int id, PlantaRequest request) {
+    public Planta updatePlanta(int id, PlantaRequest request) {
         validatePlanta(request);
 
-        PlantaDB planta = getPlantaById(id);
-        Optional<PlantaDB> plantaConMismoNombre = plantaJpaRepository.findByName(request.getName());
+        Planta planta = getPlantaById(id);
+        Optional<Planta> plantaConMismoNombre = plantaJpaRepository.findByName(request.getName());
         if (plantaConMismoNombre.isPresent() && !plantaConMismoNombre.get().getId().equals(id)) {
             throw new RuntimeException("Planta ya existe");
         }
@@ -71,16 +72,18 @@ public class PlantaService {
         return plantaJpaRepository.save(planta);
     }
 
-    public List<PlantaDB> getAllPlantas() {
+    public List<Planta> getAllPlantas() {
         return plantaJpaRepository.findAll();
     }
-    public PlantaDB getPlantaById(int id) {
-        return plantaJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Planta no encontrada con id: " + id));
 
+    public Planta getPlantaById(int id) {
+        return plantaJpaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Planta no encontrada con id: " + id));
     }
+
     public boolean deletePlantaById(int id) {
-        Optional<PlantaDB> plantabuscar=plantaJpaRepository.findById(id);
-        if(plantabuscar.isPresent()) {
+        Optional<Planta> plantabuscar = plantaJpaRepository.findById(id);
+        if (plantabuscar.isPresent()) {
             plantaJpaRepository.delete(plantabuscar.get());
             return true;
         }

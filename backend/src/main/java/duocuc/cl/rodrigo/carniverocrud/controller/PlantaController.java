@@ -1,8 +1,9 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.PlantaRequest;
+
 import duocuc.cl.rodrigo.carniverocrud.controller.response.PlantaResponse;
-import duocuc.cl.rodrigo.carniverocrud.repository.PlantaDB;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
+import duocuc.cl.rodrigo.carniverocrud.models.request.PlantaRequest;
 import duocuc.cl.rodrigo.carniverocrud.service.PlantaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,7 @@ public class PlantaController {
     @PutMapping("/{id}/{stock}")
     public ResponseEntity<?> addStock(@PathVariable int id,@PathVariable int stock){
         try{
-            PlantaDB plantaactualizada= plantaService.addstockplanta(stock,id);
+            Planta plantaactualizada= plantaService.addstockplanta(stock,id);
             return ResponseEntity.ok(plantaactualizada);
 
         }catch(IllegalArgumentException e){
@@ -33,7 +34,7 @@ public class PlantaController {
     }
     @GetMapping
     public ResponseEntity<List<PlantaResponse>> getAllPlanta(){
-        List<PlantaDB> plantas=plantaService.getAllPlantas();
+        List<Planta> plantas=plantaService.getAllPlantas();
         List<PlantaResponse> plantasResponse=plantas.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -42,7 +43,7 @@ public class PlantaController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getPlantaById(@PathVariable int id){
         try{
-            PlantaDB planta=plantaService.getPlantaById(id);
+            Planta planta=plantaService.getPlantaById(id);
             return ResponseEntity.ok(mapToResponse(planta));
         }catch(RuntimeException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -51,7 +52,7 @@ public class PlantaController {
     @PostMapping
     public ResponseEntity<?> registerPlanta(@RequestBody PlantaRequest request) {
         try {
-            PlantaDB planta = plantaService.registerNewPlanta(request);
+            Planta planta = plantaService.registerNewPlanta(request);
             return new ResponseEntity<>(planta, HttpStatus.OK);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -61,7 +62,7 @@ public class PlantaController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePlanta(@PathVariable int id, @RequestBody PlantaRequest request) {
         try {
-            PlantaDB planta = plantaService.updatePlanta(id, request);
+            Planta planta = plantaService.updatePlanta(id, request);
             return ResponseEntity.ok(planta);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -82,7 +83,7 @@ public class PlantaController {
 
 
 
-    private PlantaResponse mapToResponse(PlantaDB db) {
+    private PlantaResponse mapToResponse(Planta db) {
         return new PlantaResponse(
                 db.getId(),
                 db.getName(),

@@ -1,20 +1,25 @@
-package duocuc.cl.rodrigo.carniverocrud.repository;
+package duocuc.cl.rodrigo.carniverocrud.models.entity;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name="plantas")
-public class PlantaDB {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+@ToString
+@Entity 
+@Table (name = "planta")
+public class Planta {
+    @Id 
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Integer id;
     @Column(name = "name", nullable = false,length = 50)
