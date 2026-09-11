@@ -57,20 +57,16 @@ public class SecurityConfig {
     }
 
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-
         configuration.setAllowedMethods(Arrays.asList("*"));
-
         configuration.setAllowedHeaders(Arrays.asList("*"));
-
-
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
@@ -89,17 +85,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/api/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/api/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/planta/api/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/uploads").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
-                        // 2. CONTENIDO (PÚBLICO)
-                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/uploads").permitAll()
+                        // 2. ADMINISTRACIÓN
+                        .requestMatchers(HttpMethod.GET, "/user/api").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/user/api").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/user/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/planta/api").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/uploads/api", "/api/uploads").hasRole("ADMIN")
 
                         // 3. TRANSACCIONAL (PROTEGIDO - REQUIERE TOKEN)
                         .requestMatchers(HttpMethod.POST, "/purchase/api").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 );

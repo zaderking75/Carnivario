@@ -1,19 +1,17 @@
-package duocuc.cl.rodrigo.carniverocrud.models;
+package duocuc.cl.rodrigo.carniverocrud.controller.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
-@NoArgsConstructor
-@ToString
-public class Usuario {
-    private int id;
+public class UsuarioResponse {
+    private Integer id;
     private String name;
     private String lastname;
     private String email;
-    private String password;
     private String role;
     private String phone;
     private String address;

@@ -9,7 +9,7 @@ const Header = ({search, setSearch}) => {
     const [usuario, setUsuario] = useState(AuthService.getCurrentUser());
     const [cantidadCarrito, setCantidadCarrito] = useState(0);
     const mostrarBarra = location.pathname === "/" || location.pathname === "/catalogo";
-    const isAdmin = usuario?.role === "ADMIN";
+    const isAdmin = AuthService.isAdmin();
 
     useEffect(() => {
         const userStored = JSON.parse(localStorage.getItem("usuarioLogueado"));
@@ -65,6 +65,15 @@ const Header = ({search, setSearch}) => {
 
                         <div className="icon-heart" title="Favoritos" onClick={() => navigate("/favoritos")}></div>
                     </>
+                )}
+                {isAdmin && (
+                    <button
+                        type="button"
+                        onClick={() => navigate("/admin")}
+                        style={{ fontSize: "0.8rem", padding: "6px 10px", cursor: "pointer" }}
+                    >
+                        Admin
+                    </button>
                 )}
                 <div className="perfil-contenedor" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                     {usuario ? (

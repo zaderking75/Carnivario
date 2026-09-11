@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import Catalogo from './components/Catalogo';
@@ -9,7 +9,12 @@ import Carrito from './components/Carrito';
 import Favoritos from './components/Favoritos';
 import ProductoDetalle from "./components/ProductoDetalle";
 import AdminDashboard from './components/AdminDashboard';
+import AuthService from './services/AuthService';
 import './App.css';
+
+const AdminRoute = ({ children }) => {
+    return AuthService.isAdmin() ? children : <Navigate to="/login" replace />;
+};
 
 function App() {
     const [search, setSearch] = useState("");
@@ -27,7 +32,7 @@ function App() {
               <Route path="/carrito" element={<Carrito />} />
               <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/producto/:id" element={<ProductoDetalle />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </main>
         <Footer />

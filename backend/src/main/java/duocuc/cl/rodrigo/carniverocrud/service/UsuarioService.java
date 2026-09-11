@@ -1,22 +1,19 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
-import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
-import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -35,42 +32,62 @@ public class UsuarioService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        // 2. Si la autenticación fue exitosa, la guarda en el contexto
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // 3. Genera el JWT usando el email (Subject)
-        return jwtProvider.generateToken(request.getEmail());
+        Usuario usuario = getUsuarioByEmail(request.getEmail());
+        return jwtProvider.generateToken(usuario.getEmail(), usuario.getRole());
     }
-    public UsuarioDB registrarUsuario(RegisterRequest request) {
 
+    public Usuario registrarUsuario(RegisterRequest request) {
+        return registrarUsuario(request, "CLIENTE");
+    }
+
+    public Usuario registrarUsuario(RegisterRequest request, String role) {
         if (usuarioJpaRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new RuntimeException("El email ya esta registrado");
         }
 
-        // 1. Creamos la Entidad (UsuarioDB) y mapeamos los campos
-        UsuarioDB usuario = new UsuarioDB();
+        Usuario usuario = new Usuario();
         usuario.setName(request.getName());
         usuario.setLastname(request.getLastname());
         usuario.setEmail(request.getEmail());
         usuario.setPhone(request.getPhone());
         usuario.setAddress(request.getAddress());
         usuario.setCommune(request.getCommune());
-
-        // 2. Encriptamos y guardamos la clave
         usuario.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // 3. Establecer defaults (Role, Activo)
-        usuario.setRole("CLIENTE");
+        usuario.setRole(normalizeRole(role));
 
         return usuarioJpaRepository.save(usuario);
     }
 
-    public UsuarioDB getUsuarioById(Integer id) {
+    public List<Usuario> getAllUsuarios() {
+        return usuarioJpaRepository.findAll();
+    }
+
+    public Usuario cambiarRol(Integer id, String role) {
+        Usuario usuario = getUsuarioById(id);
+        usuario.setRole(normalizeRole(role));
+        return usuarioJpaRepository.save(usuario);
+    }
+
+    public Usuario getUsuarioById(Integer id) {
         return usuarioJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    public UsuarioDB getUsuarioByEmail(String email) {
+
+    public Usuario getUsuarioByEmail(String email) {
         return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email no encontrado"));
     }
 
+    private String normalizeRole(String role) {
+        String normalizedRole = Optional.ofNullable(role)
+                .orElse("CLIENTE")
+                .trim()
+                .toUpperCase();
 
+        if (!normalizedRole.equals("CLIENTE") && !normalizedRole.equals("ADMIN")) {
+            throw new RuntimeException("Rol invalido. Usa CLIENTE o ADMIN");
+        }
+
+        return normalizedRole;
+    }
 }
