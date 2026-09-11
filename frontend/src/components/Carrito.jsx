@@ -52,7 +52,6 @@ const Carrito = () => {
         try {
             for (const item of carrito) {
                 const compraRequest = {
-                    idUser: usuario.id,
                     idPlanta: item.id,
                     quantity: item.cantidad
                 };
@@ -69,7 +68,7 @@ const Carrito = () => {
         } catch (error) {
             console.error("Error al comprar:", error);
             if (error.response && error.response.status === 400) {
-                alert("Error: " + error.response.data);
+                alert("Error: " + (error.response.data?.message || error.response.data));
             } else {
                 alert("Hubo un error al procesar la compra. Intenta de nuevo.");
             }

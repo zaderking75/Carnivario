@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +46,7 @@ public class UsuarioService {
 
     public Usuario registrarUsuario(RegisterRequest request, String role) {
         if (usuarioJpaRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new RuntimeException("El email ya esta registrado");
+            throw new IllegalArgumentException("El email ya esta registrado");
         }
 
         Usuario usuario = new Usuario();
@@ -71,11 +73,11 @@ public class UsuarioService {
     }
 
     public Usuario getUsuarioById(Integer id) {
-        return usuarioJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        return usuarioJpaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
     public Usuario getUsuarioByEmail(String email) {
-        return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email no encontrado"));
+        return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email no encontrado"));
     }
 
     private String normalizeRole(String role) {
@@ -85,7 +87,7 @@ public class UsuarioService {
                 .toUpperCase();
 
         if (!normalizedRole.equals("CLIENTE") && !normalizedRole.equals("ADMIN")) {
-            throw new RuntimeException("Rol invalido. Usa CLIENTE o ADMIN");
+            throw new IllegalArgumentException("Rol invalido. Usa CLIENTE o ADMIN");
         }
 
         return normalizedRole;

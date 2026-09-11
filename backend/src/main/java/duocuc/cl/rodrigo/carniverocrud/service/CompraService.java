@@ -10,6 +10,10 @@ import duocuc.cl.rodrigo.carniverocrud.repository.PlantaJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,32 +30,28 @@ public class CompraService {
     @Autowired
     private DetalleCompraJpaRepository detalleCompraJpaRepository;
 
+    @Autowired
+    private UsuarioJpaRepository usuarioJpaRepository;
+
     @Transactional
-    public Map<String, Object> registerPurchase(CompraRequest request) {
+    public Map<String, Object> registerPurchase(CompraRequest request, Authentication authentication) {
+        if (request.getIdPlanta() == null || request.getIdPlanta() <= 0) {
+            throw new IllegalArgumentException("Debes indicar una planta valida");
+        }
+        if (request.getQuantity() == null || request.getQuantity() <= 0) {
+            throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+        }
+        String comprador = authenticatedUserId(authentication);
+        Planta planta = plantaJpaRepository.findByIdForUpdate(request.getIdPlanta())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
+        if (planta.getStock() < request.getQuantity()) {
+            throw new IllegalArgumentException("Stock insuficiente.");
+        }
         Compra nuevaCompra = new Compra();
-        nuevaCompra.setIdUser(request.getIdUser());
-        nuevaCompra.setEstado(
-                request.getEstado() == null || request.getEstado().isBlank()
-                        ? "PENDIENTE"
-                        : request.getEstado()
-        );
+        nuevaCompra.setIdUser(comprador);
+        nuevaCompra.setEstado("PENDIENTE");
 
         Compra compraGuardada = compraJpaRepository.save(nuevaCompra);
-
-        if (request.getIdPlanta() == null) {
-            return mapPurchase(compraGuardada, null);
-        }
-
-        if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            throw new RuntimeException("La cantidad debe ser mayor a 0");
-        }
-
-        Planta planta = plantaJpaRepository.findById(request.getIdPlanta())
-                .orElseThrow(() -> new RuntimeException("Planta no encontrada"));
-
-        if (planta.getStock() < request.getQuantity()) {
-            throw new RuntimeException("Stock insuficiente.");
-        }
 
         planta.setStock(planta.getStock() - request.getQuantity());
         plantaJpaRepository.save(planta);
@@ -66,9 +66,15 @@ public class CompraService {
         return mapPurchase(compraGuardada, detalleGuardado);
     }
 
-    public Map<String, Object> getPurchase(Integer id) {
+    public Map<String, Object> getPurchase(Integer id, Authentication authentication) {
         Compra compra = compraJpaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Compra con el id: " + id + " no existe."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Compra no encontrada"));
+        String userId = authenticatedUserId(authentication);
+        boolean admin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+        if (!admin && !userId.equals(compra.getIdUser())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes consultar compras de otro usuario");
+        }
 
         Detalle_Compra detalle = detalleCompraJpaRepository.findAll().stream()
                 .filter(d -> d.getId_compra() == compra.getId())
@@ -76,6 +82,15 @@ public class CompraService {
                 .orElse(null);
 
         return mapPurchase(compra, detalle);
+    }
+
+    private String authenticatedUserId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Debes iniciar sesion");
+        }
+        return usuarioJpaRepository.findByEmail(authentication.getName())
+                .map(usuario -> usuario.getId().toString())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
     }
 
     public List<Map<String, Object>> getAllPurchases() {

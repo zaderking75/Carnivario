@@ -48,7 +48,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
             // 4. Cargar los detalles del usuario desde la BD
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            UserDetails userDetails;
+            try {
+                userDetails = userDetailsService.loadUserByUsername(userEmail);
+            } catch (org.springframework.security.core.userdetails.UsernameNotFoundException exception) {
+                SecurityContextHolder.clearContext();
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             // 5. Si el token es válido (usando el método validateToken de JwtProvider)
             if (jwtProvider.validateToken(jwt)) {

@@ -27,8 +27,6 @@ public class PlantaController {
 
         }catch(IllegalArgumentException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }catch(RuntimeException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
     @GetMapping
@@ -41,19 +39,15 @@ public class PlantaController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getPlantaById(@PathVariable int id){
-        try{
-            Planta planta=plantaService.getPlantaById(id);
-            return ResponseEntity.ok(mapToResponse(planta));
-        }catch(RuntimeException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        Planta planta = plantaService.getPlantaById(id);
+        return ResponseEntity.ok(mapToResponse(planta));
     }
     @PostMapping
     public ResponseEntity<?> registerPlanta(@RequestBody PlantaRequest request) {
         try {
             Planta planta = plantaService.registerNewPlanta(request);
-            return new ResponseEntity<>(planta, HttpStatus.OK);
-        } catch (RuntimeException e) {
+            return new ResponseEntity<>(planta, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
@@ -63,7 +57,7 @@ public class PlantaController {
         try {
             Planta planta = plantaService.updatePlanta(id, request);
             return ResponseEntity.ok(planta);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
