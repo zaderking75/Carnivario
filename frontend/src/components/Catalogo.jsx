@@ -7,9 +7,10 @@ import FavoritoService from "../services/FavoritoService";
 
 const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
-    const [productoSeleccionado, setProductoSeleccionado] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
     const navigate = useNavigate();
-    const [update, setUpdate] = useState(0);
+    const [, setUpdate] = useState(0);
 
 
     const handleToggleFavorito = (id) => {
@@ -18,12 +19,19 @@ const Catalogo = ({ search = "" }) => {
     };
 
     useEffect(() => {
+        setLoading(true);
+        setError("");
         PlantaService.getAllPlanta()
             .then(response => {
-                setPlantas(response.data);
+                setPlantas(Array.isArray(response.data) ? response.data : []);
             })
             .catch(error => {
                 console.error("Error cargando plantas:", error);
+                setError("No se pudieron cargar los productos.");
+                setPlantas([]);
+            })
+            .finally(() => {
+                setLoading(false);
             });
     }, []);
 
@@ -49,10 +57,17 @@ const Catalogo = ({ search = "" }) => {
 
 
     const visiblePlants = plantas.filter((plant) =>
-        plant.name.toLowerCase().includes(search.toLowerCase())
+        (plant.name || "").toLowerCase().includes(search.toLowerCase())
     );
     return (
         <main className="catalogo-container">
+            {loading && <p className="catalogo-status">Cargando productos...</p>}
+            {!loading && error && <p className="catalogo-status catalogo-status-error">{error}</p>}
+            {!loading && !error && visiblePlants.length === 0 && (
+                <p className="catalogo-status">
+                    {plantas.length === 0 ? "No hay productos registrados." : "No se encontraron productos."}
+                </p>
+            )}
             <div className="productos-grid">
                 {visiblePlants.map((planta) => {
                     const agotado = planta.stock <= 0;
@@ -93,7 +108,7 @@ const Catalogo = ({ search = "" }) => {
                             <div className="content">
                                 <h3>{planta.name}</h3>
                                 <p>{planta.description}</p>
-                                <p><strong>${planta.price.toLocaleString('es-CL')}</strong></p>
+                                <p><strong>${Number(planta.price || 0).toLocaleString('es-CL')}</strong></p>
 
                                 {!agotado && <p style={{fontSize: '0.8rem', color: '#666'}}>Stock: {planta.stock}</p>}
 
