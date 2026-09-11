@@ -49,7 +49,7 @@ public class UserController {
         try {
             Usuario nuevoUsuario = usuarioService.registrarUsuario(request);
             return new ResponseEntity<>(mapToResponse(nuevoUsuario), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -67,7 +67,7 @@ public class UserController {
         try {
             Usuario nuevoUsuario = usuarioService.registrarUsuario(request, request.getRole());
             return new ResponseEntity<>(mapToResponse(nuevoUsuario), HttpStatus.CREATED);
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class UserController {
         try {
             Usuario usuario = usuarioService.cambiarRol(id, request.get("role"));
             return ResponseEntity.ok(mapToResponse(usuario));
-        } catch (RuntimeException e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

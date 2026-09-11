@@ -5,6 +5,8 @@ import duocuc.cl.rodrigo.carniverocrud.models.request.PlantaRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.PlantaJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,7 @@ public class PlantaService {
 
         Optional<Planta> plantabuscar = plantaJpaRepository.findByName(planta.getName());
         if (plantabuscar.isPresent()) {
-            throw new RuntimeException("Planta ya existe");
+            throw new IllegalArgumentException("Planta ya existe");
         }
 
         Planta plantaDB = new Planta();
@@ -43,7 +45,7 @@ public class PlantaService {
         }
 
         Planta planta = plantaJpaRepository.findById(plantaid)
-                .orElseThrow(() -> new RuntimeException("Planta no encontrada con id: " + plantaid));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada con id: " + plantaid));
         int nuevoStock = planta.getStock() + stock;
         if (nuevoStock < 0) {
             throw new IllegalArgumentException("El stock final no puede ser negativo");
@@ -56,10 +58,11 @@ public class PlantaService {
     public Planta updatePlanta(int id, PlantaRequest request) {
         validatePlanta(request);
 
-        Planta planta = getPlantaById(id);
+        Planta planta = plantaJpaRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
         Optional<Planta> plantaConMismoNombre = plantaJpaRepository.findByName(request.getName());
         if (plantaConMismoNombre.isPresent() && !plantaConMismoNombre.get().getId().equals(id)) {
-            throw new RuntimeException("Planta ya existe");
+            throw new IllegalArgumentException("Planta ya existe");
         }
 
         planta.setName(request.getName());
@@ -78,7 +81,7 @@ public class PlantaService {
 
     public Planta getPlantaById(int id) {
         return plantaJpaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Planta no encontrada con id: " + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada con id: " + id));
     }
 
     public boolean deletePlantaById(int id) {
@@ -92,10 +95,10 @@ public class PlantaService {
 
     private void validatePlanta(PlantaRequest planta) {
         if (planta.getPrice() <= 0) {
-            throw new RuntimeException("El precio debe ser mayor a 0");
+            throw new IllegalArgumentException("El precio debe ser mayor a 0");
         }
         if (planta.getStock() < 0) {
-            throw new RuntimeException("El stock no puede ser negativo");
+            throw new IllegalArgumentException("El stock no puede ser negativo");
         }
     }
 }

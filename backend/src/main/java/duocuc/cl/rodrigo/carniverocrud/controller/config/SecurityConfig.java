@@ -79,6 +79,17 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .exceptionHandling(errors -> errors
+                        .authenticationEntryPoint((request, response, exception) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\":\"Debes iniciar sesion con un token valido.\"}");
+                        })
+                        .accessDeniedHandler((request, response, exception) -> {
+                            response.setStatus(403);
+                            response.setContentType("application/json;charset=UTF-8");
+                            response.getWriter().write("{\"message\":\"No tienes permisos para esta operacion.\"}");
+                        }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // 1. AUTENTICACIÓN (PÚBLICO)
@@ -98,7 +109,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/uploads/api", "/api/uploads").hasRole("ADMIN")
 
                         // 3. TRANSACCIONAL (PROTEGIDO - REQUIERE TOKEN)
-                        .requestMatchers(HttpMethod.POST, "/purchase/api").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/purchase/api", "/purchase/api/").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/purchase/api").authenticated()
 
                         .anyRequest().authenticated()
                 );

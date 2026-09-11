@@ -40,13 +40,15 @@ const AdminDashboard = () => {
     }, [navigate]);
 
     const getErrorMessage = (error, fallback) => {
+        if (error?.response?.status === 401) return "Tu sesion no es valida. Inicia sesion nuevamente.";
+        if (error?.response?.status === 403) return "No tienes permisos para esta operacion.";
         const data = error?.response?.data;
         if (typeof data === "string") return data;
         return data?.message || data?.error || fallback;
     };
 
     const isUnauthorized = (error) => {
-        return error?.response?.status === 401 || error?.response?.status === 403;
+        return error?.response?.status === 403;
     };
 
     const showSuccess = (text) => {
