@@ -67,7 +67,11 @@ function Registro() {
       console.error(err);
       setError(true);
 
-      const msgBackend = err.response?.data?.message || err.response?.data || "Error al registrar usuario.";
+      const data = err.response?.data;
+      const msgBackend = (typeof data === "string" ? data : data?.message || data?.error)
+        || (!err.response
+          ? "No se pudo conectar con el servidor. Revisa que el backend esté iniciado y que el origen del frontend esté permitido."
+          : `No se pudo registrar el usuario (HTTP ${err.response.status}).`);
       setMensaje("Error: " + msgBackend);
     }
   };
