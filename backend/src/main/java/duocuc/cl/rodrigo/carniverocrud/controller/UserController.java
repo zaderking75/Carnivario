@@ -1,10 +1,11 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
-import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
+
 import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
-import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class UserController {
     public ResponseEntity<?> login(@RequestBody AuthRequest loginRequest) {
         try {
             String jwtToken = usuarioService.login(loginRequest);
-            UsuarioDB usuario = usuarioService.getUsuarioByEmail(loginRequest.getEmail());
+            Usuario usuario = usuarioService.getUsuarioByEmail(loginRequest.getEmail());
 
             Map<String, Object> response = new HashMap<>();
             response.put("token", jwtToken);
@@ -50,9 +51,9 @@ public class UserController {
         }
     }
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDB> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<Usuario> register(@RequestBody RegisterRequest request) {
         try {
-            UsuarioDB nuevoUsuario = usuarioService.registrarUsuario(request);
+            Usuario nuevoUsuario = usuarioService.registrarUsuario(request);
             return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(null);
