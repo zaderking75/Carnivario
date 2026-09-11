@@ -39,13 +39,12 @@ public class PlantaService {
         return plantaJpaRepository.save(plantaDB);
     }
 
-    @org.springframework.transaction.annotation.Transactional
     public Planta addstockplanta(int stock, int plantaid) {
         if (stock == 0) {
             throw new IllegalArgumentException("La cantidad de ajuste no puede ser 0");
         }
 
-        Planta planta = plantaJpaRepository.findByIdForUpdate(plantaid)
+        Planta planta = plantaJpaRepository.findById(plantaid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada con id: " + plantaid));
         int nuevoStock = planta.getStock() + stock;
         if (nuevoStock < 0) {
@@ -56,11 +55,10 @@ public class PlantaService {
         return plantaJpaRepository.save(planta);
     }
 
-    @org.springframework.transaction.annotation.Transactional
     public Planta updatePlanta(int id, PlantaRequest request) {
         validatePlanta(request);
 
-        Planta planta = plantaJpaRepository.findByIdForUpdate(id)
+        Planta planta = plantaJpaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
         Optional<Planta> plantaConMismoNombre = plantaJpaRepository.findByName(request.getName());
         if (plantaConMismoNombre.isPresent() && !plantaConMismoNombre.get().getId().equals(id)) {

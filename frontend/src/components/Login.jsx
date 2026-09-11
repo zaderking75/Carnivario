@@ -66,18 +66,16 @@
                   </div>
               )}
 
-              <label htmlFor="login-email">Email</label>
+              <label>Email</label>
               <input
-                  id="login-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
               />
 
-              <label htmlFor="login-password">Contraseña</label>
+              <label>Contraseña</label>
               <input
-                  id="login-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

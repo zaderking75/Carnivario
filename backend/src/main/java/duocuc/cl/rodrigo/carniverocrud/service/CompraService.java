@@ -42,7 +42,7 @@ public class CompraService {
             throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
         }
         String comprador = authenticatedUserId(authentication);
-        Planta planta = plantaJpaRepository.findByIdForUpdate(request.getIdPlanta())
+        Planta planta = plantaJpaRepository.findById(request.getIdPlanta())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
         if (planta.getStock() < request.getQuantity()) {
             throw new IllegalArgumentException("Stock insuficiente.");

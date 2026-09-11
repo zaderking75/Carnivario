@@ -46,7 +46,7 @@ public class PlantaController {
     public ResponseEntity<?> registerPlanta(@RequestBody PlantaRequest request) {
         try {
             Planta planta = plantaService.registerNewPlanta(request);
-            return new ResponseEntity<>(planta, HttpStatus.CREATED);
+            return new ResponseEntity<>(planta, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
