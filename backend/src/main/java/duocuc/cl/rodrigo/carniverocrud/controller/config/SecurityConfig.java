@@ -57,30 +57,13 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
-
-        configuration.setAllowedMethods(Arrays.asList("*"));
-
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
-
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
 
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
@@ -89,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/api/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/api/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/planta/api/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/uploads").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
                         // 2. ADMINISTRACIÓN
@@ -103,6 +86,8 @@ public class SecurityConfig {
 
                         // 3. TRANSACCIONAL (PROTEGIDO - REQUIERE TOKEN)
                         .requestMatchers(HttpMethod.POST, "/purchase/api").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 );

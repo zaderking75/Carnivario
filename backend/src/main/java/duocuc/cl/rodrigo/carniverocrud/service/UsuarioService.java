@@ -1,17 +1,21 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.AuthRequest;
-import duocuc.cl.rodrigo.carniverocrud.controller.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
-import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioDB;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,25 +38,23 @@ public class UsuarioService {
 
         // 2. Si la autenticación fue exitosa, la guarda en el contexto
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        UsuarioDB usuario = getUsuarioByEmail(request.getEmail());
+        
+        Usuario usuario = getUsuarioByEmail(request.getEmail());
 
         // 3. Genera el JWT usando email y rol
         return jwtProvider.generateToken(usuario.getEmail(), usuario.getRole());
     }
-
-    public UsuarioDB registrarUsuario(RegisterRequest request) {
+    public Usuario registrarUsuario(RegisterRequest request) {
         return registrarUsuario(request, "CLIENTE");
     }
 
-    public UsuarioDB registrarUsuario(RegisterRequest request, String role) {
-
+    public Usuario registrarUsuario(RegisterRequest request, String role) {
         if (usuarioJpaRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new RuntimeException("El email ya está registrado");
         }
 
-        // 1. Creamos la Entidad (UsuarioDB) y mapeamos los campos
-        UsuarioDB usuario = new UsuarioDB();
+        // 1. Creamos la Entidad (Usuario) y mapeamos los campos
+        Usuario usuario = new Usuario();
         usuario.setName(request.getName());
         usuario.setLastname(request.getLastname());
         usuario.setEmail(request.getEmail());
@@ -68,24 +70,21 @@ public class UsuarioService {
 
         return usuarioJpaRepository.save(usuario);
     }
-
-    public List<UsuarioDB> getAllUsuarios() {
+    public List<Usuario> getAllUsuarios() {
         return usuarioJpaRepository.findAll();
     }
 
-    public UsuarioDB cambiarRol(Integer id, String role) {
-        UsuarioDB usuario = getUsuarioById(id);
+    public Usuario cambiarRol(Integer id, String role) {
+        Usuario usuario = getUsuarioById(id);
         usuario.setRole(normalizeRole(role));
         return usuarioJpaRepository.save(usuario);
     }
-
-    public UsuarioDB getUsuarioById(Integer id) {
+    public Usuario getUsuarioById(Integer id) {
         return usuarioJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    public UsuarioDB getUsuarioByEmail(String email) {
+    public Usuario getUsuarioByEmail(String email) {
         return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email no encontrado"));
     }
-
     private String normalizeRole(String role) {
         String normalizedRole = Optional.ofNullable(role)
                 .orElse("CLIENTE")
