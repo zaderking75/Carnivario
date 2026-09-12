@@ -1,8 +1,8 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.request.CompraRequest;
-import duocuc.cl.rodrigo.carniverocrud.models.Compra;
-import duocuc.cl.rodrigo.carniverocrud.repository.CompraDB;
+
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
+import duocuc.cl.rodrigo.carniverocrud.models.request.CompraRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.CompraJpaRepository;
 import duocuc.cl.rodrigo.carniverocrud.service.CompraService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,7 @@ public class CompraController {
     @PostMapping
     public ResponseEntity<?> createPurchase(@RequestBody CompraRequest compraRequest) {
         try{
-            CompraDB nuevaCompra = compraService.registerPurchase(compraRequest);
+            Compra nuevaCompra = compraService.registerPurchase(compraRequest);
 
             return ResponseEntity.ok(nuevaCompra);
         }catch(RuntimeException e){
@@ -30,7 +30,7 @@ public class CompraController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getPurchasebyId(@PathVariable Integer id) {
         try{
-            CompraDB nuevaCompra = compraService.getPurchase(id);
+            Compra nuevaCompra = compraService.getPurchase(id);
             return ResponseEntity.ok(nuevaCompra);
 
         }catch(RuntimeException e){
