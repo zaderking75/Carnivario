@@ -73,6 +73,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/api/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/planta/api/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/uploads").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
 
                         // 2. ADMINISTRACIÓN

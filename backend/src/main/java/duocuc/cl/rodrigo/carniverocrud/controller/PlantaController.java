@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/planta/api")
-@CrossOrigin(origins = "*")
 public class PlantaController {
     @Autowired
     private PlantaService plantaService;
