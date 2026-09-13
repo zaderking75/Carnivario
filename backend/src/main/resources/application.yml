@@ -1,3 +1,10 @@
+server:
+  port: 8081
+
+jwt:
+  secret: K7/yT1X0avLam999999999SedeCentral100LaPintanaadmincarniveroclGlobalAdmin2a10kGoXrQfppLBjS7hj6L8EuN0dT7NgWW
+  expiration: 86400
+
 spring:
   datasource:
     url: jdbc:mysql://mysql-carnivario:3306/carnivario?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
@@ -13,13 +20,24 @@ spring:
         hbm2ddl:
           auto: update
         dialect: org.hibernate.dialect.MySQLDialect
+        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
+  
   sql:
     init:
       mode: always
       continue-on-error: true
-server:
-  port: 8081
-jwt:
-  secret: K7/yT1X0avLam999999999SedeCentral100LaPintanaadmincarniveroclGlobalAdmin2a10kGoXrQfppLBjS7hj6L8EuN0dT7NgWW
-  expiration: 86400
+
+  security:
+    oauth2:
+      client:
+        registration:
+          azure:
+            client-id: ${AZURE_CLIENT_ID}
+            client-secret: ${AZURE_CLIENT_SECRET}
+            scope: openid, profile, email
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/azure"
+        provider:
+          azure:
+            issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0

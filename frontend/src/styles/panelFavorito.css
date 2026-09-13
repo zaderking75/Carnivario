@@ -41,3 +41,40 @@
 .btn-quitar-fav:hover {
     background-color: #c62828;
 }
+
+.btn-ir-catalogo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 22px;
+  padding: 12px 24px;
+  color: #ffffff;
+  background: #287a42;
+  border: 1px solid #287a42;
+  border-radius: 10px;
+  box-shadow: 0 7px 17px rgba(40, 122, 66, 0.23);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.btn-ir-catalogo:hover {
+  background: #1f6535;
+  border-color: #1f6535;
+  box-shadow: 0 9px 22px rgba(40, 122, 66, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-ir-catalogo:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(40, 122, 66, 0.2);
+}
+
+.btn-ir-catalogo:focus-visible {
+  outline: 3px solid rgba(40, 122, 66, 0.25);
+  outline-offset: 3px;
+}

@@ -15,6 +15,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtAuthFilter;
+import duocuc.cl.rodrigo.carniverocrud.controller.security.OAuth2LoginSuccessHandler;
+
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -29,11 +31,12 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-
-    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter /*, JwtAuthEntryPoint unauthorizedHandler */) {
+    public SecurityConfig(UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter, OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler) {
         this.userDetailsService = userDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
+        this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
     }
 
     @Bean
@@ -58,25 +61,13 @@ public class SecurityConfig {
 
 
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","http://3.212.230.250"));
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
-        configuration.setExposedHeaders(Arrays.asList("Authorization"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
 
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .exceptionHandling(errors -> errors
@@ -96,8 +87,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/user/api/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/api/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/planta/api/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/uploads").permitAll()
                         .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
 
                         // 2. ADMINISTRACIÓN
                         .requestMatchers(HttpMethod.GET, "/user/api").hasRole("ADMIN")
@@ -109,11 +101,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/uploads/api", "/api/uploads").hasRole("ADMIN")
 
                         // 3. TRANSACCIONAL (PROTEGIDO - REQUIERE TOKEN)
-                        .requestMatchers(HttpMethod.GET, "/purchase/api", "/purchase/api/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/purchase/api").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/purchase/api").permitAll()
+                        .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
-                );
+                )
+                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2LoginSuccessHandler));
 
         http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

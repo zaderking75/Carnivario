@@ -6,14 +6,16 @@ import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
 import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,11 +37,12 @@ public class UsuarioService {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        
         Usuario usuario = getUsuarioByEmail(request.getEmail());
-        return jwtProvider.generateToken(usuario.getEmail(), usuario.getRole());
-    }
 
+        // 3. Genera el JWT usando email y rol
+        return jwtProvider.generateToken(usuario.getEmail());
+    }
     public Usuario registrarUsuario(RegisterRequest request) {
         return registrarUsuario(request, "CLIENTE");
     }
@@ -49,6 +52,7 @@ public class UsuarioService {
             throw new IllegalArgumentException("El email ya esta registrado");
         }
 
+        // 1. Creamos la Entidad (Usuario) y mapeamos los campos
         Usuario usuario = new Usuario();
         usuario.setName(request.getName());
         usuario.setLastname(request.getLastname());
@@ -61,7 +65,6 @@ public class UsuarioService {
 
         return usuarioJpaRepository.save(usuario);
     }
-
     public List<Usuario> getAllUsuarios() {
         return usuarioJpaRepository.findAll();
     }
@@ -71,15 +74,12 @@ public class UsuarioService {
         usuario.setRole(normalizeRole(role));
         return usuarioJpaRepository.save(usuario);
     }
-
     public Usuario getUsuarioById(Integer id) {
-        return usuarioJpaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        return usuarioJpaRepository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-
     public Usuario getUsuarioByEmail(String email) {
-        return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email no encontrado"));
+        return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Email no encontrado"));
     }
-
     private String normalizeRole(String role) {
         String normalizedRole = Optional.ofNullable(role)
                 .orElse("CLIENTE")
