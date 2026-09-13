@@ -42,7 +42,7 @@ public class UsuarioService {
         Usuario usuario = getUsuarioByEmail(request.getEmail());
 
         // 3. Genera el JWT usando email y rol
-        return jwtProvider.generateToken(usuario.getEmail(), usuario.getRole());
+        return jwtProvider.generateToken(usuario.getEmail());
     }
     public Usuario registrarUsuario(RegisterRequest request) {
         return registrarUsuario(request, "CLIENTE");
