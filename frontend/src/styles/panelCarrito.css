@@ -1,91 +1,111 @@
-
 .carrito-container {
-    padding: 2rem;
-    max-width: 1000px;
-    margin: 0 auto;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    min-height: 60vh;
+  width: calc(100% - 32px);
+  max-width: 1100px;
+  margin: 46px auto 70px;
+  padding: clamp(24px, 4vw, 44px);
+  color: #233129;
+  border: 1px solid #dce8df;
+  border-radius: 20px;
+  box-shadow: 0 14px 38px rgba(24, 66, 38, .11);
 }
 
 .carrito-titulo {
-    text-align: center;
-    color: #333;
-    margin-bottom: 2rem;
+  margin: 0 0 30px;
+  color: #173c26;
+  font-size: clamp(1.7rem, 3vw, 2.35rem);
+  text-align: left;
 }
 
 .tabla-carrito {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e0e9e2;
+  border-radius: 14px;
+}
+
+.tabla-carrito th:nth-child(3),
+.tabla-carrito td:nth-child(3) {
+  white-space: nowrap;
 }
 
 .tabla-carrito th {
-    background-color: #f4f4f4;
-    padding: 10px;
-    text-align: left;
-    color: #555;
+  padding: 14px 16px;
+  color: #31553d;
+  background: #edf5ef;
+  border-bottom: 1px solid #dce8df;
+  font-size: .83rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
 .tabla-carrito td {
-    padding: 15px 10px;
-    border-bottom: 1px solid #eee;
-    vertical-align: middle;
+  padding: 60px;
+  color: #45534a;
+  border-bottom-color: #edf1ee;
 }
 
 .item-img {
-    width: 60px;
-    height: 60px;
-    object-fit: cover;
-    border-radius: 6px;
+  width: 72px;
+  height: 72px;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
 }
 
 .btn-cantidad {
-    background-color: #ddd;
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  color: #28583a;
+  background: #eaf3ec;
+  border: 1px solid #cee0d2;
+  border-radius: 9px;
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 .btn-eliminar {
-    background-color: #e53935;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 4px;
-    cursor: pointer;
+  padding: 8px 13px;
+  color: #a12e2e;
+  background: #fff1f1;
+  border: 1px solid #efcaca;
+  border-radius: 9px;
+  font-weight: 700;
 }
 
 .carrito-resumen {
-    text-align: right;
-    margin-top: 20px;
-    padding-top: 20px;
-    border-top: 2px solid #ff5722;
+  padding: 24px;
+  color: #183b26;
+  background: #f3f8f4;
+  border: 1px solid #d7e7da;
+  border-radius: 14px;
 }
 
 .btn-checkout {
-    background-color: #ff5722;
-    color: white;
-    padding: 12px 30px;
-    border: none;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin-top: 10px;
+  padding: 13px 26px;
+  background: #287a42;
+  border-radius: 10px;
+  box-shadow: 0 7px 17px rgba(40, 122, 66, .23);
+  font-weight: 700;
 }
 
 .btn-checkout:hover {
-    background-color: #e64a19;
+  background: #1f6535;
 }
 
-.mensaje-vacio {
-    text-align: center;
-    font-size: 1.2rem;
-    color: #777;
-    margin-top: 50px;
+@media (max-width: 720px) {
+  .carrito-container {
+    width: calc(100% - 20px);
+    margin: 24px auto 45px;
+    padding: 20px 14px;
+  }
+
+  .tabla-carrito {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
 }

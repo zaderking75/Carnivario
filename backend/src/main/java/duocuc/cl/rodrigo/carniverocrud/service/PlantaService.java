@@ -21,6 +21,7 @@ public class PlantaService {
     }
 
     public Planta registerNewPlanta(PlantaRequest planta) {
+    public Planta registerNewPlanta(PlantaRequest planta) {
         validatePlanta(planta);
 
         Optional<Planta> plantabuscar = plantaJpaRepository.findByName(planta.getName());
@@ -50,7 +51,6 @@ public class PlantaService {
         if (nuevoStock < 0) {
             throw new IllegalArgumentException("El stock final no puede ser negativo");
         }
-
         planta.setStock(nuevoStock);
         return plantaJpaRepository.save(planta);
     }
@@ -92,7 +92,6 @@ public class PlantaService {
         }
         return false;
     }
-
     private void validatePlanta(PlantaRequest planta) {
         if (planta.getPrice() <= 0) {
             throw new IllegalArgumentException("El precio debe ser mayor a 0");

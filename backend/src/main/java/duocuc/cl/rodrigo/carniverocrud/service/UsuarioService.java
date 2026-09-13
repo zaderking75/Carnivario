@@ -4,8 +4,12 @@ import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
 import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
 import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.UsuarioJpaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -45,6 +49,7 @@ public class UsuarioService {
     }
 
     public Usuario registrarUsuario(RegisterRequest request, String role) {
+    public Usuario registrarUsuario(RegisterRequest request, String role) {
         if (usuarioJpaRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new IllegalArgumentException("El email ya esta registrado");
         }
@@ -68,6 +73,8 @@ public class UsuarioService {
 
     public Usuario cambiarRol(Integer id, String role) {
         Usuario usuario = getUsuarioById(id);
+    public Usuario cambiarRol(Integer id, String role) {
+        Usuario usuario = getUsuarioById(id);
         usuario.setRole(normalizeRole(role));
         return usuarioJpaRepository.save(usuario);
     }
@@ -79,7 +86,6 @@ public class UsuarioService {
     public Usuario getUsuarioByEmail(String email) {
         return usuarioJpaRepository.findByEmail(email).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Email no encontrado"));
     }
-
     private String normalizeRole(String role) {
         String normalizedRole = Optional.ofNullable(role)
                 .orElse("CLIENTE")

@@ -47,7 +47,7 @@ const Favoritos = () => {
             {plantasFavoritas.length === 0 ? (
                 <div className="mensaje-vacio">
                     <p>No tienes favoritos guardados aún.</p>
-                    <button onClick={() => navigate("/")} style={{marginTop: '20px', padding: '10px 20px', cursor:'pointer'}}>
+                    <button onClick={() => navigate("/")} className="btn-ir-catalogo">
                         Ir al Catálogo
                     </button>
                 </div>

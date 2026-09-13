@@ -24,9 +24,11 @@ public class PlantaController {
         try{
             Planta plantaactualizada= plantaService.addstockplanta(stock,id);
             return ResponseEntity.ok(plantaactualizada);
-
+            
         }catch(IllegalArgumentException e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());    
+        }catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
     @GetMapping
@@ -39,8 +41,12 @@ public class PlantaController {
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getPlantaById(@PathVariable int id){
-        Planta planta = plantaService.getPlantaById(id);
-        return ResponseEntity.ok(mapToResponse(planta));
+        try{
+            Planta planta=plantaService.getPlantaById(id);
+            return ResponseEntity.ok(mapToResponse(planta));
+        }catch(RuntimeException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
     @PostMapping
     public ResponseEntity<?> registerPlanta(@RequestBody PlantaRequest request) {
@@ -51,7 +57,6 @@ public class PlantaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
     @PutMapping("/{id}")
     public ResponseEntity<?> updatePlanta(@PathVariable int id, @RequestBody PlantaRequest request) {
         try {
