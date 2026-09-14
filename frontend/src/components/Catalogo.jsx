@@ -10,6 +10,7 @@ const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [notificacion, setNotificacion] = useState("");
     const navigate = useNavigate();
     const [, setUpdate] = useState(0);
 
@@ -58,8 +59,15 @@ const Catalogo = ({ search = "" }) => {
             carritoActual.push({ ...planta, cantidad: 1 });
         }
         CarritoService.guardarCarrito(carritoActual);
-        alert(`¡${planta.name} añadida al carrito!`);
-        window.location.reload();
+        setNotificacion(`¡${planta.name} añadida al carrito!`);
+
+        window.dispatchEvent(
+        new Event("carritoActualizado")
+        );
+
+        setTimeout(() => {
+            setNotificacion("");
+        }, 3000);
     };
 
 
@@ -68,6 +76,18 @@ const Catalogo = ({ search = "" }) => {
     );
     return (
         <main className="catalogo-container">
+            {notificacion && (
+                <div
+                    className="notificacion-toast"
+                    role="status"
+                >
+                    <span className="notificacion-toast-icono">
+                        ✓
+                    </span>
+
+                    <span>{notificacion}</span>
+                </div>
+            )}
             {loading && <p className="catalogo-status">Cargando productos...</p>}
             {!loading && error && <p className="catalogo-status catalogo-status-error">{error}</p>}
             {!loading && !error && visiblePlants.length === 0 && (

@@ -12,18 +12,45 @@ const Header = ({search, setSearch}) => {
     const mostrarBarra = location.pathname === "/" || location.pathname === "/catalogo";
     const isAdmin = AuthService.isAdmin();
 
-    useEffect(() => {
-        const userStored = JSON.parse(localStorage.getItem("usuarioLogueado"));
-        if (userStored) {
-            setUsuario(userStored);
-        }
-        const carritoStored = CarritoService.getCarrito();
-        const totalUnidades = carritoStored.reduce((acumulador, item) => {
-            return acumulador + parseInt(item.cantidad || 0);
-        }, 0);
+useEffect(() => {
+    const userStored = JSON.parse(
+        localStorage.getItem("usuarioLogueado")
+    );
+
+    if (userStored) {
+        setUsuario(userStored);
+    }
+
+    const actualizarContadorCarrito = () => {
+        const carritoStored =
+            CarritoService.getCarrito();
+
+        const totalUnidades = carritoStored.reduce(
+            (acumulador, item) => {
+                return acumulador +
+                    parseInt(item.cantidad || 0);
+            },
+            0
+        );
 
         setCantidadCarrito(totalUnidades);
-    }, []);
+    };
+
+    actualizarContadorCarrito();
+
+    window.addEventListener(
+        "carritoActualizado",
+        actualizarContadorCarrito
+    );
+
+    return () => {
+        window.removeEventListener(
+            "carritoActualizado",
+            actualizarContadorCarrito
+        );
+    };
+}, []);
+
     const handleLogoClick = () => {
         if (isAdmin) {
             navigate("/admin");
