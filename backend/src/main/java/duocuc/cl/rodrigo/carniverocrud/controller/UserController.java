@@ -1,7 +1,5 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
-
-
 import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
 import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;

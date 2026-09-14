@@ -6,6 +6,9 @@ jwt:
   expiration: 86400
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
+
   datasource:
     url: jdbc:mysql://mysql-carnivario:3306/carnivario?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
     username: carnivario
@@ -19,7 +22,6 @@ spring:
         format_sql: false
         hbm2ddl:
           auto: update
-        dialect: org.hibernate.dialect.MySQLDialect
         dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
   

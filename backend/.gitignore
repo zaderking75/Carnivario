@@ -34,3 +34,4 @@ build/
 
 # Local database
 /db/
+.env
