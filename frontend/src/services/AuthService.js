@@ -42,7 +42,7 @@ class AuthService {
     }
 
     updateProfile(datosPerfil) {
-        return api.put(`${API_BASE_URL}/me`, datosPerfil);
+        return api.put(`${API_BASE_URL}/update`, datosPerfil);
     }
 
     createUser(usuario) {
