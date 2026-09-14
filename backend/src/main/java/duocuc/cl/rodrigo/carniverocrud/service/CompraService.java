@@ -3,7 +3,9 @@ package duocuc.cl.rodrigo.carniverocrud.service;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Detalle_Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
 import duocuc.cl.rodrigo.carniverocrud.models.request.CompraRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.ItemRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.CompraJpaRepository;
 import duocuc.cl.rodrigo.carniverocrud.repository.DetalleCompraJpaRepository;
 import duocuc.cl.rodrigo.carniverocrud.repository.PlantaJpaRepository;
@@ -29,43 +31,77 @@ public class CompraService {
     private PlantaJpaRepository plantaJpaRepository;
     @Autowired
     private DetalleCompraJpaRepository detalleCompraJpaRepository;
-
     @Autowired
     private UsuarioJpaRepository usuarioJpaRepository;
+    @Autowired 
+    private EmailService emailService;
 
     @Transactional
     public Map<String, Object> registerPurchase(CompraRequest request, Authentication authentication) {
-        if (request.getIdPlanta() == null || request.getIdPlanta() <= 0) {
-            throw new IllegalArgumentException("Debes indicar una planta valida");
+        if (request.getItems() == null || request.getItems().isEmpty()) {
+            throw new IllegalArgumentException("El carrito no puede estar vacío");
         }
-        if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
-        }
-        String comprador = authenticatedUserId(authentication);
-        Planta planta = plantaJpaRepository.findById(request.getIdPlanta())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
-        if (planta.getStock() < request.getQuantity()) {
-            throw new IllegalArgumentException("Stock insuficiente.");
-        }
-        Compra nuevaCompra = new Compra();
-        nuevaCompra.setIdUser(comprador);
-        nuevaCompra.setEstado("PENDIENTE");
 
+        // 1. Obtener el usuario completo para sacar su Email y su ID
+        Usuario usuario = usuarioJpaRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no encontrado"));
+        String compradorId = usuario.getId().toString();
+        String emailDestino = usuario.getEmail();
+
+        // 2. Crear la compra base
+        Compra nuevaCompra = new Compra();
+        nuevaCompra.setIdUser(compradorId);
+        nuevaCompra.setEstado("PENDIENTE");
         Compra compraGuardada = compraJpaRepository.save(nuevaCompra);
 
-        planta.setStock(planta.getStock() - request.getQuantity());
-        plantaJpaRepository.save(planta);
+        // 3. Procesar cada item del carrito
+        List<Detalle_Compra> listaDetalles = new ArrayList<>();
+        List<Planta> plantasCompradas = new ArrayList<>();
+        int totalCompra = 0;
 
-        Detalle_Compra detalle = new Detalle_Compra();
-        detalle.setId_compra(compraGuardada.getId());
-        detalle.setId_planta(planta.getId());
-        detalle.setCantidad(request.getQuantity());
-        detalle.setPrecio(planta.getPrice());
+        for (ItemRequest item : request.getItems()) {
+            if (item.getIdPlanta() == null || item.getIdPlanta() <= 0) {
+                throw new IllegalArgumentException("Debes indicar una planta válida");
+            }
+            if (item.getCantidad() == null || item.getCantidad() <= 0) {
+                throw new IllegalArgumentException("La cantidad debe ser mayor a 0");
+            }
 
-        Detalle_Compra detalleGuardado = detalleCompraJpaRepository.save(detalle);
-        return mapPurchase(compraGuardada, detalleGuardado);
+            Planta planta = plantaJpaRepository.findById(item.getIdPlanta())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada"));
+            
+            if (planta.getStock() < item.getCantidad()) {
+                throw new IllegalArgumentException("Stock insuficiente para: " + planta.getName());
+            }
+
+            // Descontar stock
+            planta.setStock(planta.getStock() - item.getCantidad());
+            plantaJpaRepository.save(planta);
+
+            // Crear el detalle
+            Detalle_Compra detalle = new Detalle_Compra();
+            detalle.setId_compra(compraGuardada.getId());
+            detalle.setId_planta(planta.getId());
+            detalle.setCantidad(item.getCantidad());
+            detalle.setPrecio(planta.getPrice());
+
+            Detalle_Compra detalleGuardado = detalleCompraJpaRepository.save(detalle);
+            
+            listaDetalles.add(detalleGuardado);
+            plantasCompradas.add(planta);
+            totalCompra += (planta.getPrice() * item.getCantidad());
+        }
+
+        // 4. Enviar el correo
+        try {
+            emailService.enviarConfirmacionCompra(emailDestino, compraGuardada, listaDetalles, plantasCompradas, totalCompra);
+        } catch (Exception e) {
+            System.err.println("Error enviando correo: " + e.getMessage());
+        }
+
+        // 5. Retornar la respuesta (adaptada para listas)
+        return mapPurchaseMultiple(compraGuardada, listaDetalles, totalCompra);
     }
-
     public Map<String, Object> getPurchase(Integer id, Authentication authentication) {
         Compra compra = compraJpaRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Compra no encontrada"));
@@ -131,6 +167,23 @@ public class CompraService {
             response.put("total", detalle.getPrecio() * detalle.getCantidad());
         }
 
+        return response;
+    }
+    private Map<String, Object> mapPurchaseMultiple(Compra compra, List<Detalle_Compra> detalles, int total) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("idCompra", compra.getId());
+        response.put("estado", compra.getEstado());
+        response.put("totalCompra", total);
+        
+        List<Map<String, Object>> detallesList = detalles.stream().map(d -> {
+            Map<String, Object> det = new LinkedHashMap<>();
+            det.put("idPlanta", d.getId_planta());
+            det.put("cantidad", d.getCantidad());
+            det.put("subtotal", d.getPrecio() * d.getCantidad());
+            return det;
+        }).collect(Collectors.toList());
+        
+        response.put("detalles", detallesList);
         return response;
     }
 }

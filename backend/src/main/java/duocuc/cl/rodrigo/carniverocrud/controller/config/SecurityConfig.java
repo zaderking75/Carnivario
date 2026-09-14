@@ -104,6 +104,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/purchase/api").permitAll()
                         .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/checkout/api").authenticated()
 
                         .anyRequest().authenticated()
                 )

@@ -51,20 +51,20 @@ const Carrito = () => {
         }
 
         try {
-            for (const item of carrito) {
-                const compraRequest = {
-                    idPlanta: item.id,
-                    quantity: item.cantidad
-                };
-                await CompraService.createPurchase(compraRequest);
-            }
+        // Preparamos el carrito para enviarlo completo en una sola petición
+        const items = carrito.map(item => ({
+            idPlanta: item.id,
+            cantidad: item.cantidad
+        }));
+            await CompraService.createPurchase({ items });
+            
 
             alert("¡Compra realizada con éxito! Gracias por tu preferencia.");
 
             CarritoService.vaciarCarrito();
             setCarrito([]);
             setTotal(0);
-            window.location.reload();
+            navigate("/home");
 
         } catch (error) {
             console.error("Error al comprar:", error);
