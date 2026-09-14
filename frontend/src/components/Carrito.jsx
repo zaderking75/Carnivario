@@ -9,6 +9,7 @@ const Carrito = () => {
     const navigate = useNavigate();
     const [carrito, setCarrito] = useState([]);
     const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const carritoGuardado = CarritoService.getCarrito();
@@ -43,12 +44,14 @@ const Carrito = () => {
     };
 
     const handleCheckout = async () => {
+        if (loading) return;
         const usuario = AuthService.getCurrentUser();
         if (!usuario) {
             alert("Debes iniciar sesión para comprar.");
             navigate("/login");
             return;
         }
+        setLoading(true);
 
         try {
         // Preparamos el carrito para enviarlo completo en una sola petición
@@ -73,6 +76,8 @@ const Carrito = () => {
             } else {
                 alert("Hubo un error al procesar la compra. Intenta de nuevo.");
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -110,13 +115,13 @@ const Carrito = () => {
                         </td>
                         <td>${item.price.toLocaleString('es-CL')}</td>
                         <td>
-                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, -1)}>-</button>
+                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, -1)}disabled={loading}>-</button>
                             {item.cantidad}
-                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, 1)}>+</button>
+                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, 1)}disabled={loading}>+</button>
                         </td>
                         <td>${(item.price * item.cantidad).toLocaleString('es-CL')}</td>
                         <td>
-                            <button className="btn-eliminar" onClick={() => eliminarProducto(item.id)}>🗑️</button>
+                            <button className="btn-eliminar" onClick={() => eliminarProducto(item.id)} disabled={loading}>🗑️</button>
                         </td>
                     </tr>
                 ))}
@@ -125,7 +130,9 @@ const Carrito = () => {
 
             <div className="carrito-resumen">
                 <h2>Total: ${total.toLocaleString('es-CL')}</h2>
-                <button className="btn-checkout" onClick={handleCheckout}>Finalizar Compra</button>
+                <button className="btn-checkout" onClick={handleCheckout}disabled={loading}>
+                    {loading ? "Procesando..." : "Finalizar Compra"}
+                </button>
             </div>
         </div>
     );

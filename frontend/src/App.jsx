@@ -11,6 +11,7 @@ import ProductoDetalle from "./components/ProductoDetalle";
 import AdminDashboard from './components/AdminDashboard';
 import AuthService from './services/AuthService';
 import './App.css';
+import { CarritoProvider } from './context/CarritoContext';
 
 const AdminRoute = ({ children }) => {
     return AuthService.isAdmin() ? children : <Navigate to="/login" replace />;
@@ -19,6 +20,7 @@ const AdminRoute = ({ children }) => {
 function App() {
     const [search, setSearch] = useState("");
   return (
+     <CarritoProvider>{}
       <BrowserRouter>
           <Header search={search} setSearch={setSearch} />
 
@@ -37,6 +39,7 @@ function App() {
         </main>
         <Footer />
       </BrowserRouter>
+    </CarritoProvider>
   );
 }
 

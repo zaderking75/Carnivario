@@ -5,11 +5,14 @@ import AuthService from '../services/AuthService';
 import FavoritoService from '../services/FavoritoService';
 import '../styles/panelDetailProducto.css';
 import CarritoService from "../services/CarritoService";
+import { useCarrito } from "../context/CarritoContext";
+
 
 const ProductoDetalle = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    const { agregarProducto } = useCarrito();
     const [planta, setPlanta] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cantidad, setCantidad] = useState(1);
@@ -55,34 +58,10 @@ const ProductoDetalle = () => {
             return;
         }
         const cantidadAAgregar = parseInt(cantidad);
-        const stockReal = parseInt(planta.stock);
-        if (cantidadAAgregar > stockReal) {
-            alert("No hay suficiente stock.");
-            return;
-        }
-
-        const carritoActual = CarritoService.getCarrito();
-        const indice = carritoActual.findIndex(item => item.id === planta.id);
-
-        if (indice !== -1) {
-            const cantidadEnCarrito = parseInt(carritoActual[indice].cantidad);
-            const nuevaCantidadTotal = cantidadEnCarrito + cantidadAAgregar;
-
-            if (nuevaCantidadTotal > stockReal) {
-                alert(`No puedes añadir ${cantidadAAgregar} más. Ya tienes ${cantidadEnCarrito} en el carrito y el stock máximo es ${stockReal}. Solo podrías llevar ${stockReal - cantidadEnCarrito} más.`);
-                return;
-            }
-
-            carritoActual[indice].cantidad = nuevaCantidadTotal;
-        } else {
-            carritoActual.push({ ...planta, cantidad: cantidad });
-        }
-
-        CarritoService.guardarCarrito(carritoActual);
-        alert(`Agregaste ${cantidadAAgregar} unidades de ${planta.name} al carrito.`);
-
-        window.location.reload();
+        const resultado = agregarProducto(planta, cantidadAAgregar);
+        alert(resultado.mensaje);
     };
+    
     const handleToggleFavorito = () => {
         if (!AuthService.getCurrentUser()) {
         alert("Debes iniciar sesión para guardar favoritos.");

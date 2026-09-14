@@ -5,6 +5,7 @@ import AuthService from "../services/AuthService";
 import '../App.css';
 import FavoritoService from "../services/FavoritoService";
 import CarritoService from "../services/CarritoService";
+import { useCarrito } from "../context/CarritoContext";
 
 const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
@@ -12,6 +13,7 @@ const Catalogo = ({ search = "" }) => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const [, setUpdate] = useState(0);
+    const { agregarProducto } = useCarrito();
 
 
     const handleToggleFavorito = (id) => {
@@ -50,16 +52,8 @@ const Catalogo = ({ search = "" }) => {
             navigate("/login");
             return;
         }
-        const carritoActual = CarritoService.getCarrito();
-        const indice = carritoActual.findIndex(item => item.id === planta.id);
-        if (indice !== -1) {
-            carritoActual[indice].cantidad += 1;
-        } else {
-            carritoActual.push({ ...planta, cantidad: 1 });
-        }
-        CarritoService.guardarCarrito(carritoActual);
-        alert(`¡${planta.name} añadida al carrito!`);
-        window.location.reload();
+        const resultado = agregarProducto(planta, 1);
+        alert(resultado.mensaje);
     };
 
 

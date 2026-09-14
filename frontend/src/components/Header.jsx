@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { useNavigate,useLocation} from "react-router-dom";
 import AuthService from "../services/AuthService";
 import "../App.css";
-import CarritoService from "../services/CarritoService";
+import { useCarrito } from "../context/CarritoContext"
 
 const Header = ({search, setSearch}) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(AuthService.getCurrentUser());
-    const [cantidadCarrito, setCantidadCarrito] = useState(0);
+    const { cantidadTotal } = useCarrito();
     const mostrarBarra = location.pathname === "/" || location.pathname === "/catalogo";
     const isAdmin = AuthService.isAdmin();
 
@@ -17,12 +17,6 @@ const Header = ({search, setSearch}) => {
         if (userStored) {
             setUsuario(userStored);
         }
-        const carritoStored = CarritoService.getCarrito();
-        const totalUnidades = carritoStored.reduce((acumulador, item) => {
-            return acumulador + parseInt(item.cantidad || 0);
-        }, 0);
-
-        setCantidadCarrito(totalUnidades);
     }, []);
     const handleLogoClick = () => {
         if (isAdmin) {
@@ -34,7 +28,6 @@ const Header = ({search, setSearch}) => {
     const handleLogout = () => {
         AuthService.logout();
         setUsuario(null);
-        setCantidadCarrito(0);
         navigate("/");
     };
 
@@ -62,7 +55,7 @@ const Header = ({search, setSearch}) => {
                 {!isAdmin && (
                     <>
                         <div className="icon-cart" title="Carrito" onClick={() => navigate("/carrito")}>
-                            <span className="carrito-contador">{cantidadCarrito}</span>
+                            <span className="carrito-contador">{cantidadTotal}</span>{}
                         </div>
 
                         <div className="icon-heart" title="Favoritos" onClick={() => navigate("/favoritos")}></div>
