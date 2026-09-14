@@ -1,4 +1,7 @@
 # Logs
+# Local secrets
+/.env
+
 logs
 *.log
 npm-debug.log*
