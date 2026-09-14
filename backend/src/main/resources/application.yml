@@ -1,6 +1,5 @@
 server:
   port: 8081
-
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400
