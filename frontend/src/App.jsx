@@ -11,6 +11,7 @@ import ProductoDetalle from "./components/ProductoDetalle";
 import AdminDashboard from './components/AdminDashboard';
 import AuthService from './services/AuthService';
 import OAuthCallback from "./components/OAuthCallback";
+import Perfil from "./components/Perfil";
 import './App.css';
 import { CarritoProvider } from './context/CarritoContext';
 
@@ -36,6 +37,7 @@ function App() {
               <Route path="/carrito" element={<Carrito />} />
               <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/producto/:id" element={<ProductoDetalle />} />
+              <Route path="/perfil" element={<Perfil />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </main>

@@ -14,7 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
+import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +71,19 @@ public class UserController {
                 mapToResponse(usuario)
         );
     }
+
+       @PutMapping("/me")
+    public ResponseEntity<?> actualizarPerfil(
+            Authentication authentication,
+            @RequestBody UpdateProfileRequest request) {
+        try {
+            Usuario usuario = usuarioService.actualizarPerfil(authentication.getName(), request);
+            return ResponseEntity.ok(mapToResponse(usuario));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("message", e.getMessage()));
+        }
+    }
+
 
     @GetMapping
     public ResponseEntity<List<UsuarioResponse>> getAllUsuarios() {

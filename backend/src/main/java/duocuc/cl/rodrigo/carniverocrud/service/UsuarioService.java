@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -92,4 +93,36 @@ public class UsuarioService {
 
         return normalizedRole;
     }
+
+    public Usuario actualizarPerfil(String email, UpdateProfileRequest request) {
+    Usuario usuario = getUsuarioByEmail(email);
+
+    usuario.setName(validarCampo(request.getName(), "nombre", 50));
+    usuario.setLastname(validarCampo(request.getLastname(), "apellido", 50));
+    usuario.setPhone(validarCampo(request.getPhone(), "teléfono", 50));
+    usuario.setAddress(validarCampo(request.getAddress(), "dirección", 50));
+    usuario.setCommune(validarCampo(request.getCommune(), "comuna", 50));
+
+    return usuarioJpaRepository.save(usuario);
+}
+
+private String validarCampo(String valor, String nombreCampo, int largoMaximo) {
+    if (valor == null || valor.trim().isEmpty()) {
+        throw new IllegalArgumentException(
+            "El campo " + nombreCampo + " es obligatorio"
+        );
+    }
+
+    String valorLimpio = valor.trim();
+
+    if (valorLimpio.length() > largoMaximo) {
+        throw new IllegalArgumentException(
+            "El campo " + nombreCampo +
+            " no puede superar los " + largoMaximo + " caracteres"
+        );
+    }
+
+    return valorLimpio;
+}
+
 }
