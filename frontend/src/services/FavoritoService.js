@@ -1,8 +1,10 @@
+import UserStorageService from "./UserStorageService";
+
 class FavoritoService {
 
 
     getFavoritosIDs() {
-        return JSON.parse(localStorage.getItem("favoritos")) || [];
+        return JSON.parse(localStorage.getItem("favoritos")), [];
     }
 
 
@@ -17,7 +19,7 @@ class FavoritoService {
             favoritos.push(id);
         }
 
-        localStorage.setItem("favoritos", JSON.stringify(favoritos));
+        UserStorageService.set("favoritos", favoritos);
         return favoritos;
     }
 

@@ -24,6 +24,8 @@ class AuthService {
     }
 
     saveSession(token, user) {
+        localStorage.removeItem("carrito");
+        localStorage.removeItem("favoritos");
         localStorage.setItem("jwtToken", token);
         this.saveUser(this.withRoleFromToken(user, token));
     }
