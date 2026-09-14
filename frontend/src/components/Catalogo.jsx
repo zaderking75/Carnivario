@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";;
 import AuthService from "../services/AuthService";
 import '../App.css';
 import FavoritoService from "../services/FavoritoService";
+import CarritoService from "../services/CarritoService";
 
 const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
@@ -14,6 +15,12 @@ const Catalogo = ({ search = "" }) => {
 
 
     const handleToggleFavorito = (id) => {
+        if (!AuthService.getCurrentUser()) {
+        alert("Debes iniciar sesión para guardar favoritos.");
+        navigate("/login");
+        return;
+    }
+
         FavoritoService.toggleFavorito(id);
         setUpdate(prev => prev + 1);
     };
@@ -43,14 +50,14 @@ const Catalogo = ({ search = "" }) => {
             navigate("/login");
             return;
         }
-        let carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+        const carritoActual = CarritoService.getCarrito();
         const indice = carritoActual.findIndex(item => item.id === planta.id);
         if (indice !== -1) {
             carritoActual[indice].cantidad += 1;
         } else {
             carritoActual.push({ ...planta, cantidad: 1 });
         }
-        localStorage.setItem("carrito", JSON.stringify(carritoActual));
+        CarritoService.guardarCarrito(carritoActual);
         alert(`¡${planta.name} añadida al carrito!`);
         window.location.reload();
     };

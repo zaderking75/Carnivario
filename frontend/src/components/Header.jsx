@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate,useLocation} from "react-router-dom";
 import AuthService from "../services/AuthService";
 import "../App.css";
+import CarritoService from "../services/CarritoService";
 
 const Header = ({search, setSearch}) => {
     const location = useLocation();
@@ -16,7 +17,7 @@ const Header = ({search, setSearch}) => {
         if (userStored) {
             setUsuario(userStored);
         }
-        const carritoStored = JSON.parse(localStorage.getItem("carrito") || "[]");
+        const carritoStored = CarritoService.getCarrito();
         const totalUnidades = carritoStored.reduce((acumulador, item) => {
             return acumulador + parseInt(item.cantidad || 0);
         }, 0);
@@ -33,6 +34,7 @@ const Header = ({search, setSearch}) => {
     const handleLogout = () => {
         AuthService.logout();
         setUsuario(null);
+        setCantidadCarrito(0);
         navigate("/");
     };
 

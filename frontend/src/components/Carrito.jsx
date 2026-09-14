@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";
 import CompraService from "../services/CompraService";
 import "../styles/panelCarrito.css";
+import CarritoService from "../services/CarritoService";
 
 const Carrito = () => {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ const Carrito = () => {
     const [total, setTotal] = useState(0);
 
     useEffect(() => {
-        const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
+        const carritoGuardado = CarritoService.getCarrito();
         setCarrito(carritoGuardado);
         calcularTotal(carritoGuardado);
     }, []);
@@ -29,14 +30,14 @@ const Carrito = () => {
             return item;
         });
         setCarrito(nuevoCarrito);
-        localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+        CarritoService.guardarCarrito(nuevoCarrito);
         calcularTotal(nuevoCarrito);
     };
 
     const eliminarProducto = (id) => {
         const nuevoCarrito = carrito.filter(item => item.id !== id);
         setCarrito(nuevoCarrito);
-        localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
+        CarritoService.guardarCarrito(nuevoCarrito);
         calcularTotal(nuevoCarrito);
         window.location.reload();
     };
@@ -60,7 +61,7 @@ const Carrito = () => {
 
             alert("¡Compra realizada con éxito! Gracias por tu preferencia.");
 
-            localStorage.removeItem("carrito");
+            CarritoService.vaciarCarrito();
             setCarrito([]);
             setTotal(0);
             window.location.reload();

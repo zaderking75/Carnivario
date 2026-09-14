@@ -4,6 +4,7 @@ import PlantaService from '../services/PlantaService';
 import AuthService from '../services/AuthService';
 import FavoritoService from '../services/FavoritoService';
 import '../styles/panelDetailProducto.css';
+import CarritoService from "../services/CarritoService";
 
 const ProductoDetalle = () => {
     const { id } = useParams();
@@ -58,8 +59,9 @@ const ProductoDetalle = () => {
         if (cantidadAAgregar > stockReal) {
             alert("No hay suficiente stock.");
             return;
-        }let carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
+        }
 
+        const carritoActual = CarritoService.getCarrito();
         const indice = carritoActual.findIndex(item => item.id === planta.id);
 
         if (indice !== -1) {
@@ -76,12 +78,18 @@ const ProductoDetalle = () => {
             carritoActual.push({ ...planta, cantidad: cantidad });
         }
 
-        localStorage.setItem("carrito", JSON.stringify(carritoActual));
+        CarritoService.guardarCarrito(carritoActual);
         alert(`Agregaste ${cantidadAAgregar} unidades de ${planta.name} al carrito.`);
 
         window.location.reload();
     };
     const handleToggleFavorito = () => {
+        if (!AuthService.getCurrentUser()) {
+        alert("Debes iniciar sesión para guardar favoritos.");
+        navigate("/login");
+        return;
+    }
+
         if (planta) {
             FavoritoService.toggleFavorito(planta.id);
             setEsFavorito(!esFavorito);
