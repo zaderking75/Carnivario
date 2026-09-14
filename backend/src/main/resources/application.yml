@@ -2,7 +2,7 @@ server:
   port: 8081
 
 jwt:
-  secret: K7/yT1X0avLam999999999SedeCentral100LaPintanaadmincarniveroclGlobalAdmin2a10kGoXrQfppLBjS7hj6L8EuN0dT7NgWW
+  secret: ${JWT_SECRET}
   expiration: 86400
 
 spring:
@@ -10,9 +10,9 @@ spring:
     import: optional:file:.env[.properties]
 
   datasource:
-    url: jdbc:mysql://mysql-carnivario:3306/carnivario?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
-    username: carnivario
-    password: carnivario
+    url: jdbc:mysql://${DB_HOST}:3306/carnivario?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     defer-datasource-initialization: true
