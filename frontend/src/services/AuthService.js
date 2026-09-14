@@ -37,6 +37,14 @@ class AuthService {
         return api.get(API_BASE_URL);
     }
 
+    getProfile() {
+        return api.get(`${API_BASE_URL}/me`);
+    }
+
+    updateProfile(datosPerfil) {
+        return api.put(`${API_BASE_URL}/update`, datosPerfil);
+    }
+
     createUser(usuario) {
         return api.post(API_BASE_URL, usuario);
     }

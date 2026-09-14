@@ -91,11 +91,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/images/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/user/api/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/user/api/update").authenticated()
 
                         // 2. ADMINISTRACIÓN
                         .requestMatchers(HttpMethod.GET, "/user/api").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/user/api").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/user/api/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/user/api/*/role").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/planta/api").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/planta/api/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/planta/api/**").hasRole("ADMIN")
