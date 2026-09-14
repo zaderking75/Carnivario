@@ -90,6 +90,14 @@
               >
                 ¿No tienes cuenta? Regístrate
               </button>
+              <button
+                type="button"
+                onClick={() =>
+                    AuthService.loginWithMicrosoft()
+                }
+              >
+                Ingresar con Microsoft
+            </button>
             </form>
           </div>
         </div>

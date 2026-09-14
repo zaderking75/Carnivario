@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,19 @@ public class UserController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UsuarioResponse> getAuthenticatedUser(
+            Authentication authentication
+    ) {
+        Usuario usuario = usuarioService.getUsuarioByEmail(
+                authentication.getName()
+        );
+
+        return ResponseEntity.ok(
+                mapToResponse(usuario)
+        );
     }
 
     @GetMapping

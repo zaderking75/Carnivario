@@ -11,6 +11,28 @@ class AuthService {
         return api.post(`${API_BASE_URL}/login`, credenciales);
     }
 
+    loginWithMicrosoft() {
+    window.location.href =
+        `${api.defaults.baseURL}/oauth2/authorization/azure`;
+    }
+
+    async completeMicrosoftLogin(token) {
+        localStorage.setItem("jwtToken", token);
+
+        try {
+            const response = await api.get(
+                `${API_BASE_URL}/me`
+            );
+
+            this.saveSession(token, response.data);
+
+            return response.data;
+        } catch (error) {
+            this.logout();
+            throw error;
+        }
+    }
+
     getAllUsers() {
         return api.get(API_BASE_URL);
     }
