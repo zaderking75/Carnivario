@@ -55,12 +55,23 @@ function Registro() {
 
       await AuthService.register(usuarioParaEnviar);
 
-      setMensaje("¡Registro exitoso! Redirigiendo al login...");
+      const loginResponse = await AuthService.login({
+        email: formData.email,
+        password: formData.password
+      });
+
+      const { token, user } = loginResponse.data;
+
+      AuthService.saveSession(token, user);
+
+      setMensaje("¡Registro exitoso! Entrando al catálogo...");
       setError(false);
 
       setTimeout(() => {
-        navigate("/login");
-      }, 1500);
+        navigate("/", { replace: true });
+
+        window.location.reload();
+      }, 1000);
 
     } catch (err) {
 
