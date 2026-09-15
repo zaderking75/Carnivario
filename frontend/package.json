@@ -14,8 +14,8 @@
     "@azure/msal-browser": "^4.30.0",
     "@azure/msal-react": "^3.0.29",
     "axios": "^1.13.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-router-dom": "^7.9.6",
     "recharts": "^3.5.1"
   },
