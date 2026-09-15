@@ -1,4 +1,5 @@
 package duocuc.cl.rodrigo.carniverocrud.controller.security;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,65 +18,66 @@ import java.io.IOException;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
+    public static final String LOCAL_TOKEN_HEADER = "X-Local-Token";
+
     @Autowired
     private JwtProvider jwtProvider;
 
     @Autowired
-    private UserDetailsService userDetailsService; // Necesitas la clase UserDetailsServiceImpl que crearemos después
+    private UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
-        // 1. Obtener el token del encabezado 'Authorization'
-        String authHeader = request.getHeader("Authorization");
-        String jwt = null;
-        String userEmail = null;
+        String jwt = request.getHeader(LOCAL_TOKEN_HEADER);
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            jwt = authHeader.substring(7); // "Bearer " tiene 7 caracteres
-            try {
-                // 2. Extraer el email del token (usando el JwtProvider que creamos antes)
-                userEmail = jwtProvider.getEmailFromJwt(jwt);
-            } catch (Exception e) {
-                logger.error("No se pudo obtener el email del token o el token está expirado/inválido.");
-            }
+        if (jwt == null || jwt.isBlank()) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // 3. Si encontramos el email y el usuario AÚN NO está autenticado en el contexto
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        // Una solicitud debe identificar una sola sesion.
+        if (request.getHeader("Authorization") != null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Usa un solo tipo de token");
+            return;
+        }
 
-            // 4. Cargar los detalles del usuario desde la BD
-            UserDetails userDetails;
-            try {
-                userDetails = userDetailsService.loadUserByUsername(userEmail);
-            } catch (org.springframework.security.core.userdetails.UsernameNotFoundException exception) {
-                SecurityContextHolder.clearContext();
-                filterChain.doFilter(request, response);
-                return;
-            }
+        try {
+            String userEmail = jwtProvider.getEmailFromJwt(jwt);
 
-            // 5. Si el token es válido (usando el método validateToken de JwtProvider)
-            if (jwtProvider.validateToken(jwt)) {
+            if (userEmail != null
+                    && SecurityContextHolder.getContext().getAuthentication() == null
+                    && jwtProvider.validateToken(jwt)) {
 
-                // 6. Crear el objeto de autenticación de Spring Security
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
+                UserDetails userDetails =
+                        userDetailsService.loadUserByUsername(userEmail);
+
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource()
+                                .buildDetails(request)
                 );
 
-                // 7. Establecer detalles de la autenticación web
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                // 8. AUTENTICAR: Guardar la autenticación en el contexto de seguridad
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authToken);
             }
+        } catch (Exception ignored) {
+            SecurityContextHolder.clearContext();
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token local invalido");
+            return;
         }
 
-        // 9. Continuar con la cadena de filtros (dejar pasar la solicitud)
         filterChain.doFilter(request, response);
     }
 }

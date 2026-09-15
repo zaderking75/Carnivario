@@ -15,7 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class CarniveroCrudApplicationTests {
+class CarniveroCrudApplicationTests extends IsolatedAuthTest {
 
     @Autowired
     private MockMvc mockMvc;

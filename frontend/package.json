@@ -6,13 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test:auth": "vitest run",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "@azure/msal-browser": "^4.30.0",
+    "@azure/msal-react": "^3.0.29",
     "axios": "^1.13.2",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
     "react-router-dom": "^7.9.6",
     "recharts": "^3.5.1"
   },
@@ -30,6 +33,7 @@
     "karma-chrome-launcher": "^3.2.0",
     "karma-jasmine": "^5.1.0",
     "karma-jasmine-html-reporter": "^2.1.0",
-    "vite": "^7.1.7"
+    "vite": "^7.1.7",
+    "vitest": "^4.1.11"
   }
 }

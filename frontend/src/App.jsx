@@ -10,7 +10,6 @@ import Favoritos from './components/Favoritos';
 import ProductoDetalle from "./components/ProductoDetalle";
 import AdminDashboard from './components/AdminDashboard';
 import AuthService from './services/AuthService';
-import OAuthCallback from "./components/OAuthCallback";
 import Perfil from "./components/Perfil";
 import './App.css';
 import { CarritoProvider } from './context/CarritoContext';
@@ -30,7 +29,6 @@ function App() {
 
         <main className="main-content">
           <Routes>
-              <Route path="/oauth-callback" element={<OAuthCallback />}/>
               <Route path="/" element={<Catalogo search={search} />} />
               <Route path="/catalogo" element={<Catalogo search={search} />} />
               <Route path="/home" element={<Catalogo search={search} />} />

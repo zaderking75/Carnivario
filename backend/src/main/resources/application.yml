@@ -1,10 +1,10 @@
 server:
   port: 8081
+
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400
-azure:
-  admin-group-id: ${AZURE_ADMIN_GROUP_ID}
+
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -14,6 +14,7 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+
   jpa:
     defer-datasource-initialization: true
     properties:
@@ -24,7 +25,7 @@ spring:
           auto: update
         dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
-  
+
   sql:
     init:
       mode: always
@@ -32,19 +33,11 @@ spring:
 
   security:
     oauth2:
-      client:
-        registration:
-          azure:
-          
-            client-id: ${AZURE_CLIENT_ID}
-            client-secret: ${AZURE_CLIENT_SECRET}
-            scope: openid, profile, email, Group.Read.All
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/azure"
-        provider:
-          azure:
-            issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
-            authorization-uri: "https://login.microsoftonline.com/${AZURE_TENANT_ID}/oauth2/v2.0/authorize?prompt=select_account"
+      resourceserver:
+        jwt:
+          issuer-uri: https://login.microsoftonline.com/${AZURE_TENANT_ID}/v2.0
+          audiences: ${AZURE_CLIENT_ID:169c9415-d7d0-4892-8ccf-965f3f1a0dde}
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -56,4 +49,3 @@ spring:
           auth: true
           starttls:
             enable: true
-            

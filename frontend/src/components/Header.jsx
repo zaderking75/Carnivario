@@ -25,8 +25,8 @@ const Header = ({search, setSearch}) => {
             navigate("/");
         }
     };
-    const handleLogout = () => {
-        AuthService.logout();
+    const handleLogout = async () => {
+        await AuthService.logout();
         setUsuario(null);
         navigate("/");
     };

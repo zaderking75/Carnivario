@@ -1,6 +1,5 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
 import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
 import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
@@ -11,9 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
 
@@ -69,9 +67,9 @@ public class UserController {
     public ResponseEntity<UsuarioResponse> getAuthenticatedUser(
             Authentication authentication
     ) {
-        Usuario usuario = usuarioService.getUsuarioByEmail(
-                authentication.getName()
-        );
+        Usuario usuario = authentication instanceof JwtAuthenticationToken azure
+                ? usuarioService.obtenerOCrearUsuarioMicrosoft(azure.getToken())
+                : usuarioService.getUsuarioByEmail(authentication.getName());
 
         return ResponseEntity.ok(
                 mapToResponse(usuario)
@@ -83,6 +81,9 @@ public class UserController {
             Authentication authentication,
             @RequestBody UpdateProfileRequest request) {
         try {
+            if (authentication instanceof JwtAuthenticationToken azure) {
+                usuarioService.obtenerOCrearUsuarioMicrosoft(azure.getToken());
+            }
             Usuario usuario = usuarioService.actualizarPerfil(authentication.getName(), request);
             return ResponseEntity.ok(mapToResponse(usuario));
         } catch (IllegalArgumentException e) {
