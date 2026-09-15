@@ -1,6 +1,11 @@
 # Logs
 # Local secrets
-/.env
+**/.env
+**/.env.*
+!**/.env.example
+!frontend/.env.production
+!frontend/.env.development
+**/backend.env
 
 logs
 *.log

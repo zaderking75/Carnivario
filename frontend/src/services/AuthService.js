@@ -1,36 +1,57 @@
 import api from "../api/axiosConfig";
+import {
+    msalInstance,
+    loginRequest
+} from "../auth/msal";
 
 const API_BASE_URL = "/user/api";
+
 class AuthService {
 
     register(usuario) {
-        return api.post(`${API_BASE_URL}/register`, usuario);
+        return api.post(
+            `${API_BASE_URL}/register`,
+            usuario
+        );
     }
 
+    // LOGIN PROPIO
     login(credenciales) {
-        return api.post(`${API_BASE_URL}/login`, credenciales);
+        return api.post(
+            `${API_BASE_URL}/login`,
+            credenciales
+        );
     }
 
-    loginWithMicrosoft() {
-    window.location.href =
-        `${api.defaults.baseURL}/oauth2/authorization/azure`;
+    // LOGIN MICROSOFT
+    async loginWithMicrosoft() {
+        await msalInstance.loginRedirect(
+            loginRequest
+        );
     }
 
-    async completeMicrosoftLogin(token) {
-        localStorage.setItem("jwtToken", token);
+    async completeMicrosoftLogin() {
 
+        this.clearSession();
+        localStorage.removeItem("jwtToken");
+        localStorage.setItem(
+            "authType",
+            "microsoft"
+        );
+
+        let response;
         try {
-            const response = await api.get(
-                `${API_BASE_URL}/me`
-            );
-
-            this.saveSession(token, response.data);
-
-            return response.data;
+            response = await api.get(`${API_BASE_URL}/me`);
         } catch (error) {
-            this.logout();
+            this.clearSession();
             throw error;
         }
+
+        this.saveMicrosoftSession(
+            response.data
+        );
+
+        return response.data;
     }
 
     getAllUsers() {
@@ -38,66 +59,129 @@ class AuthService {
     }
 
     getProfile() {
-        return api.get(`${API_BASE_URL}/me`);
+        return api.get(
+            `${API_BASE_URL}/me`
+        );
     }
 
     updateProfile(datosPerfil) {
-        return api.put(`${API_BASE_URL}/update`, datosPerfil);
+        return api.put(
+            `${API_BASE_URL}/update`,
+            datosPerfil
+        );
     }
 
     createUser(usuario) {
-        return api.post(API_BASE_URL, usuario);
+        return api.post(
+            API_BASE_URL,
+            usuario
+        );
     }
 
     updateRole(id, role) {
-        return api.put(`${API_BASE_URL}/${id}/role`, { role });
+        return api.put(
+            `${API_BASE_URL}/${id}/role`,
+            { role }
+        );
     }
 
+    // Se conserva este nombre porque Login.jsx ya lo usa
     saveSession(token, user) {
+        this.saveLocalSession(
+            token,
+            user
+        );
+    }
+
+    saveLocalSession(token, user) {
         localStorage.removeItem("carrito");
         localStorage.removeItem("favoritos");
-        localStorage.setItem("jwtToken", token);
-        this.saveUser(this.withRoleFromToken(user, token));
+
+        localStorage.setItem(
+            "authType",
+            "local"
+        );
+
+        localStorage.setItem(
+            "jwtToken",
+            token
+        );
+
+        this.saveUser(user);
+    }
+
+    saveMicrosoftSession(user) {
+        localStorage.removeItem("carrito");
+        localStorage.removeItem("favoritos");
+        localStorage.removeItem("jwtToken");
+
+        localStorage.setItem(
+            "authType",
+            "microsoft"
+        );
+
+        this.saveUser(user);
     }
 
     saveUser(user) {
-        localStorage.setItem("usuarioLogueado", JSON.stringify(user));
+        localStorage.setItem(
+            "usuarioLogueado",
+            JSON.stringify(user)
+        );
     }
-    logout() {
-        localStorage.removeItem("usuarioLogueado");
+
+    clearSession() {
+        localStorage.removeItem(
+            "usuarioLogueado"
+        );
         localStorage.removeItem("jwtToken");
+        localStorage.removeItem("authType");
+        localStorage.removeItem("carrito");
+        localStorage.removeItem("favoritos");
+    }
+
+    async logout() {
+        const authType = localStorage.getItem("authType");
+        this.clearSession();
+
+        if (authType === "microsoft") {
+
+            const account =
+                msalInstance.getActiveAccount();
+
+            if (account) {
+                await msalInstance.logoutRedirect({
+                    account,
+                    postLogoutRedirectUri:
+                        import.meta.env.VITE_AZURE_REDIRECT_URI
+                });
+            }
+        }
     }
 
     getCurrentUser() {
-        const userStr = localStorage.getItem("usuarioLogueado");
+        const userStr =
+            localStorage.getItem(
+                "usuarioLogueado"
+            );
+
         if (userStr) {
-            return JSON.parse(userStr);
+            try {
+                return JSON.parse(userStr);
+            } catch {
+                this.clearSession();
+            }
         }
+
         return null;
     }
 
     getCurrentRole() {
-        return this.getCurrentUser()?.role || this.getRoleFromToken(localStorage.getItem("jwtToken"));
+        return this.getCurrentUser()?.role || null;
     }
 
     isAdmin() {
         return this.getCurrentRole() === "ADMIN";
-    }
-
-    withRoleFromToken(user, token) {
-        const tokenRole = this.getRoleFromToken(token);
-        return tokenRole ? { ...user, role: tokenRole } : user;
-    }
-
-    getRoleFromToken(token) {
-        if (!token) return null;
-
-        try {
-            const payload = JSON.parse(atob(token.split(".")[1]));
-            return payload.role || null;
-        } catch (error) {
-            return null;
-        }
     }
 }
 

@@ -34,7 +34,7 @@ function Perfil() {
             } catch (error) {
                 if (!activo) return;
                 if (error.response?.status === 401 || error.response?.status === 403) {
-                    AuthService.logout();
+                    await AuthService.logout();
                     navigate("/login", { replace: true });
                     return;
                 }
@@ -91,8 +91,8 @@ function Perfil() {
         }
     };
 
-    const cerrarSesion = () => {
-        AuthService.logout();
+    const cerrarSesion = async () => {
+        await AuthService.logout();
         navigate("/", { replace: true });
         window.location.reload();
     };

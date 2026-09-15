@@ -6,12 +6,28 @@ import "../styles/panelLogin.css";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mensaje, setMensaje] = useState("");
-  const [error, setError] = useState(false);
+  const [mensaje, setMensaje] = useState(() => sessionStorage.getItem("authError") || "");
+  const [error, setError] = useState(() => Boolean(sessionStorage.getItem("authError")));
+  const [microsoftPendiente, setMicrosoftPendiente] = useState(false);
   const navigate = useNavigate();
+
+  const handleMicrosoftLogin = async () => {
+    sessionStorage.removeItem("authError");
+    setMensaje("");
+    setError(false);
+    setMicrosoftPendiente(true);
+    try {
+      await AuthService.loginWithMicrosoft();
+    } catch {
+      setMensaje("No se pudo iniciar el ingreso con Microsoft. Intenta nuevamente.");
+      setError(true);
+      setMicrosoftPendiente(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    sessionStorage.removeItem("authError");
 
     setMensaje("");
     setError(false);
@@ -97,7 +113,8 @@ function Login() {
           <button
             type="button"
             className="btn-microsoft"
-            onClick={() => AuthService.loginWithMicrosoft()}
+            onClick={handleMicrosoftLogin}
+            disabled={microsoftPendiente}
           >
             <svg width="18" height="18" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
               <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
