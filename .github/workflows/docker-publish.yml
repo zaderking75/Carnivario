@@ -2,14 +2,18 @@ name: Publish Docker images
 
 on:
   push:
-    branches: [Develop, main]
+    branches: [Develop, main, feature/auth-hibrida-msal-local]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  checks:
+    uses: ./.github/workflows/auth-checks.yml
+
   publish:
+    needs: checks
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

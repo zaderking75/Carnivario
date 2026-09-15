@@ -130,7 +130,9 @@ El script descarga primero la imagen, conserva el contenedor anterior con nombre
 
 ### Secretos de GitHub Actions
 
-`docker-publish.yml` publica imágenes. La configuración pública Vite se transmite como build args, con valores por defecto del laboratorio y posibilidad de sustituirlos con repository variables `VITE_*`.
+`docker-publish.yml` se ejecuta al hacer push a `Develop`, `main` o `feature/auth-hibrida-msal-local`, y también manualmente. Primero ejecuta `auth-checks.yml` como workflow reutilizable; solo publica ambas imágenes cuando las pruebas backend y frontend terminan correctamente. Actualiza los tags `latest` y el SHA del commit. La configuración pública Vite se transmite como build args, con valores por defecto del laboratorio y posibilidad de sustituirlos con repository variables `VITE_*`.
+
+`auth-checks.yml` también se ejecuta por separado en pull requests o manualmente. Una ejecución independiente de **Check hybrid authentication** valida el código, pero no publica imágenes.
 
 `deploy-backend.yml` agrega un despliegue **manual por SSH**, separado de la publicación. Pasa los siete secretos de backend al `docker` de EC2 a través de SSH, sin incorporarlos a la imagen ni imprimirlos.
 

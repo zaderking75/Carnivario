@@ -2,8 +2,7 @@ name: Check hybrid authentication
 
 on:
   pull_request:
-  push:
-    branches: [Develop, main, feature/auth-hibrida-msal-local]
+  workflow_call:
   workflow_dispatch:
 
 permissions:
