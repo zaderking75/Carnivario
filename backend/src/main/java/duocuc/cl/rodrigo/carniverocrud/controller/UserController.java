@@ -1,25 +1,32 @@
 package duocuc.cl.rodrigo.carniverocrud.controller;
 
-import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
-import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
-import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
-import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
-import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
-import duocuc.cl.rodrigo.carniverocrud.service.UsuarioService;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.web.bind.annotation.*;
-import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
+import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
+import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
+import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
+import duocuc.cl.rodrigo.carniverocrud.service.UsuarioService;
 
 @RestController
 @RequestMapping("/user/api")
@@ -57,7 +64,7 @@ public class UserController {
             response.put("token", token);
             response.put("user", usuario);
 
-            return ResponseEntity.ok(response);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
