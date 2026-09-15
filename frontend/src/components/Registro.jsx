@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";;
 import "../styles/panelregistro.css";
+import { useNotificacion } from "../context/NotificacionContext";
 
 function Registro() {
   const navigate = useNavigate();
+
+  const { mostrarNotificacion } = useNotificacion();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -52,16 +55,17 @@ function Registro() {
         address: formData.address,
         commune: formData.commune
       };
-
-      await AuthService.register(usuarioParaEnviar);
-
-      setMensaje("¡Registro exitoso! Redirigiendo al login...");
-      setError(false);
+      
+      const response = await AuthService.register(usuarioParaEnviar);
+      const { token, user } = response.data;
+      
+      AuthService.saveSession(token, user);
+      mostrarNotificacion("¡Registro exitoso! Bienvenido a Carniverio 🌿");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/home");
+        window.location.reload();
       }, 1500);
-
     } catch (err) {
       console.error(err);
       setError(true);

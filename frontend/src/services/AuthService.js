@@ -48,6 +48,13 @@ class AuthService {
     createUser(usuario) {
         return api.post(API_BASE_URL, usuario);
     }
+    updateUser(id, usuario) {
+        return api.put(`${API_BASE_URL}/${id}`, usuario);
+    }
+
+    deleteUser(id) {
+        return api.delete(`${API_BASE_URL}/${id}`);
+    }
 
     updateRole(id, role) {
         return api.put(`${API_BASE_URL}/${id}/role`, { role });

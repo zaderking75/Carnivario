@@ -44,6 +44,11 @@ public class UsuarioService {
         // 3. Genera el JWT usando email y rol
         return jwtProvider.generateToken(usuario.getEmail());
     }
+    
+    public String registrarUsuarioYGenerarToken(RegisterRequest request) {
+        Usuario nuevoUsuario = registrarUsuario(request);
+        return jwtProvider.generateToken(nuevoUsuario.getEmail());
+    }   
     public Usuario registrarUsuario(RegisterRequest request) {
         return registrarUsuario(request, "CLIENTE");
     }
@@ -104,14 +109,35 @@ public class UsuarioService {
     usuario.setCommune(validarCampo(request.getCommune(), "comuna", 50));
 
     return usuarioJpaRepository.save(usuario);
-}
-
-private String validarCampo(String valor, String nombreCampo, int largoMaximo) {
-    if (valor == null || valor.trim().isEmpty()) {
-        throw new IllegalArgumentException(
-            "El campo " + nombreCampo + " es obligatorio"
-        );
     }
+    public Usuario actualizarUsuarioPorId(Integer id, RegisterRequest request) {
+        Usuario usuario = getUsuarioById(id);
+
+        usuario.setName(validarCampo(request.getName(), "nombre", 50));
+        usuario.setLastname(validarCampo(request.getLastname(), "apellido", 50));
+        usuario.setEmail(validarCampo(request.getEmail(), "email", 100));
+        usuario.setPhone(validarCampo(request.getPhone(), "teléfono", 50));
+        usuario.setAddress(validarCampo(request.getAddress(), "dirección", 50));
+        usuario.setCommune(validarCampo(request.getCommune(), "comuna", 50));
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return usuarioJpaRepository.save(usuario);
+    }
+    public boolean deleteUsuario(Integer id) {
+        Usuario usuario = getUsuarioById(id);
+        usuarioJpaRepository.delete(usuario);
+        return true;
+    }
+
+    private String validarCampo(String valor, String nombreCampo, int largoMaximo) {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "El campo " + nombreCampo + " es obligatorio"
+            );
+        }
 
     String valorLimpio = valor.trim();
 
@@ -123,6 +149,6 @@ private String validarCampo(String valor, String nombreCampo, int largoMaximo) {
     }
 
     return valorLimpio;
-}
+    }
 
 }

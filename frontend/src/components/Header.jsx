@@ -9,7 +9,7 @@ const Header = ({search, setSearch}) => {
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(AuthService.getCurrentUser());
     const { cantidadTotal } = useCarrito();
-    const mostrarBarra = location.pathname === "/" || location.pathname === "/catalogo";
+    const mostrarBarra = location.pathname === "/" || location.pathname === "/home" || location.pathname === "/catalogo";
     const isAdmin = AuthService.isAdmin();
 
     useEffect(() => {
@@ -71,24 +71,26 @@ const Header = ({search, setSearch}) => {
                     </button>
                 )}
                 <div className="perfil-contenedor" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    {usuario ? (
-                        <>
-                            <span className="nav-icon" style={{ fontSize: "1.5rem" }} onClick={() => navigate("/perfil")}>👤</span>
-                            <span style={{ fontSize: "0.8rem", color: "#ff5722" }}>{usuario.name || usuario.name}</span>
-                            <button
-                                onClick={handleLogout}
-                                style={{ fontSize: "0.7rem", padding: "2px 5px", marginTop: "5px", cursor: "pointer" }}
-                            >
-                                Salir
-                            </button>
-                        </>
-                    ) : (
-                        <div onClick={() => navigate("/login")} style={{ cursor: "pointer", textAlign: "center" }}>
-                            <span className="nav-icon" style={{ fontSize: "1.5rem" }}>👤</span>
-                            <span style={{ display: "block", fontSize: "0.8rem" }}>Ingresar</span>
-                        </div>
-                    )}
+            {usuario ? (
+            <>
+            <span className="nav-icon" style={{ fontSize: "1.5rem" }} onClick={() => navigate("/perfil")}>👤</span>
+            <span style={{ fontSize: "0.8rem", color: "#ff5722" }}>{usuario.name}</span>
+            {!AuthService.isAdmin() && (
+                <button
+                    onClick={handleLogout}
+                    style={{ fontSize: "0.7rem", padding: "2px 5px", marginTop: "5px", cursor: "pointer" }}
+                >
+                    Salir
+                </button>)
+            }
+            </>
+            ) : (
+                <div onClick={() => navigate("/login")} style={{ cursor: "pointer", textAlign: "center" }}>
+                    <span className="nav-icon" style={{ fontSize: "1.5rem" }}>👤</span>
+                    <span style={{ display: "block", fontSize: "0.8rem" }}>Ingresar</span>
                 </div>
+            )}
+            </div>
             </div>
         </header>
     );

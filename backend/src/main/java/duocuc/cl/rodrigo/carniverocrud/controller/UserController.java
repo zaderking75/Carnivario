@@ -2,6 +2,7 @@ package duocuc.cl.rodrigo.carniverocrud.controller;
 
 import duocuc.cl.rodrigo.carniverocrud.controller.response.AuthResponse;
 import duocuc.cl.rodrigo.carniverocrud.controller.response.UsuarioResponse;
+import duocuc.cl.rodrigo.carniverocrud.controller.security.JwtProvider;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Usuario;
 import duocuc.cl.rodrigo.carniverocrud.models.request.AuthRequest;
 import duocuc.cl.rodrigo.carniverocrud.models.request.RegisterRequest;
@@ -52,10 +53,15 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
-            Usuario nuevoUsuario = usuarioService.registrarUsuario(request);
-            return new ResponseEntity<>(mapToResponse(nuevoUsuario), HttpStatus.CREATED);
+            String token = usuarioService.registrarUsuarioYGenerarToken(request);
+            Usuario usuario = usuarioService.getUsuarioByEmail(request.getEmail());
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("user", usuario);
+
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
@@ -110,6 +116,26 @@ public class UserController {
             return ResponseEntity.ok(mapToResponse(usuario));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteUsuario(@PathVariable Integer id) {
+        try {
+            usuarioService.getUsuarioById(id);
+            usuarioService.deleteUsuario(id);
+            return ResponseEntity.ok(Collections.singletonMap("message", "Usuario eliminado correctamente"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Collections.singletonMap("error", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> actualizarUsuarioAdmin(@PathVariable Integer id, @RequestBody RegisterRequest request) {
+        try {
+            Usuario actualizado = usuarioService.actualizarUsuarioPorId(id, request); 
+            return ResponseEntity.ok(mapToResponse(actualizado));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
         }
     }
 

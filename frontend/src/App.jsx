@@ -14,6 +14,7 @@ import OAuthCallback from "./components/OAuthCallback";
 import Perfil from "./components/Perfil";
 import './App.css';
 import { CarritoProvider } from './context/CarritoContext';
+import { NotificacionProvider } from './context/NotificacionContext';
 
 const AdminRoute = ({ children }) => {
     return AuthService.isAdmin() ? children : <Navigate to="/login" replace />;
@@ -22,7 +23,8 @@ const AdminRoute = ({ children }) => {
 function App() {
     const [search, setSearch] = useState("");
   return (
-     <CarritoProvider>{}
+     <CarritoProvider>
+      <NotificacionProvider>
       <BrowserRouter>
           <Header search={search} setSearch={setSearch} />
 
@@ -43,6 +45,7 @@ function App() {
         </main>
         <Footer />
       </BrowserRouter>
+      </NotificacionProvider>
     </CarritoProvider>
   );
 }

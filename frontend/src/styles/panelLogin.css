@@ -113,6 +113,7 @@
 
 /* Botón de Microsoft: outline, nunca compite con el naranja */
 .btn-microsoft {
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;

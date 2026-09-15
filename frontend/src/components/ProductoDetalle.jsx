@@ -4,20 +4,18 @@ import PlantaService from '../services/PlantaService';
 import AuthService from '../services/AuthService';
 import FavoritoService from '../services/FavoritoService';
 import '../styles/panelDetailProducto.css';
-import CarritoService from "../services/CarritoService";
 import { useCarrito } from "../context/CarritoContext";
-
+import { useNotificacion } from "../context/NotificacionContext";
 
 const ProductoDetalle = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
     const { agregarProducto } = useCarrito();
+    const { mostrarNotificacion } = useNotificacion();
     const [planta, setPlanta] = useState(null);
     const [loading, setLoading] = useState(true);
     const [cantidad, setCantidad] = useState(1);
-
-
     const [esFavorito, setEsFavorito] = useState(false);
 
     useEffect(() => {
@@ -31,20 +29,20 @@ const ProductoDetalle = () => {
                 }
                 setLoading(false);
             })
-        .catch(err => {
+            .catch(err => {
                 console.error("Error:", err);
                 setLoading(false);
             });
         }
     }, [id]);
+
     const handleCantidadChange = (e) => {
         let valorInput = parseInt(e.target.value);
-
 
         if (isNaN(valorInput) || valorInput < 1) valorInput = 1;
 
         if (valorInput > planta.stock) {
-            alert(`¡Solo tenemos ${planta.stock} unidades disponibles!`);
+            mostrarNotificacion(`¡Solo tenemos ${planta.stock} unidades disponibles!`, "error");
             valorInput = planta.stock;
         }
         setCantidad(valorInput);
@@ -53,21 +51,21 @@ const ProductoDetalle = () => {
     const handleComprar = () => {
         const usuario = AuthService.getCurrentUser();
         if (!usuario) {
-            alert("Inicia sesión para comprar.");
+            mostrarNotificacion("Inicia sesión para comprar.", "error");
             navigate("/login");
             return;
         }
         const cantidadAAgregar = parseInt(cantidad);
         const resultado = agregarProducto(planta, cantidadAAgregar);
-        alert(resultado.mensaje);
+        mostrarNotificacion(resultado.mensaje, resultado.ok ? "exito" : "error");
     };
-    
+
     const handleToggleFavorito = () => {
         if (!AuthService.getCurrentUser()) {
-        alert("Debes iniciar sesión para guardar favoritos.");
-        navigate("/login");
-        return;
-    }
+            mostrarNotificacion("Debes iniciar sesión para guardar favoritos.", "error");
+            navigate("/login");
+            return;
+        }
 
         if (planta) {
             FavoritoService.toggleFavorito(planta.id);
@@ -82,7 +80,6 @@ const ProductoDetalle = () => {
     return (
         <div className="detalle-wrapper">
             <div className="producto-detalle">
-
                 <div className="producto-info">
                     <img
                         src={planta.image}
@@ -90,14 +87,11 @@ const ProductoDetalle = () => {
                         className="producto-img-detalle"
                         style={agotado ? { filter: 'grayscale(100%)', opacity: 0.7 } : {}}
                     />
-
                     <div className="producto-texto">
                         <h2>{planta.name}</h2>
-
                         <p className="precio-grande">
                             <strong>Precio:</strong> ${planta.price.toLocaleString('es-CL')}
                         </p>
-
                         <p><strong>Tamaño:</strong> {planta.size || "No especificado"}</p>
                         <p><strong>Plantado:</strong> {planta.planting || "No especificado"}</p>
                         <p><strong>Descripción:</strong> {planta.description}</p>
@@ -119,7 +113,6 @@ const ProductoDetalle = () => {
                                 </span>
                             </>
                         )}
-
                         <div className="botones-contenedor">
                             <button
                                 className="btn-comprar-detalle"
@@ -129,18 +122,13 @@ const ProductoDetalle = () => {
                             >
                                 {agotado ? "Sin Stock" : "Añadir al Carrito"}
                             </button>
-
                             <button
                                 className={`btn-favorito-detalle ${esFavorito ? 'liked' : ''}`}
                                 onClick={handleToggleFavorito}
                                 title={esFavorito ? "Quitar de favoritos" : "Añadir a favoritos"}
                                 style={{
-                                    fontSize: '2rem',
-                                    border: 'none',
-                                    background: 'none',
-                                    cursor: 'pointer',
-                                    color: esFavorito ? 'red' : '#ccc',
-                                    marginLeft: '15px'
+                                    fontSize: '2rem', border: 'none', background: 'none',
+                                    cursor: 'pointer', color: esFavorito ? 'red' : '#ccc', marginLeft: '15px'
                                 }}
                             >
                                 {esFavorito ? "❤️" : "🤍"}
@@ -148,7 +136,6 @@ const ProductoDetalle = () => {
                         </div>
                     </div>
                 </div>
-
                 <button
                     onClick={() => navigate("/")}
                     style={{marginTop: '20px', background: 'transparent', border: '1px solid #ccc', padding: '10px', cursor: 'pointer', width: 'fit-content'}}
