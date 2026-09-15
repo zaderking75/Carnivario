@@ -3,7 +3,8 @@ server:
 jwt:
   secret: ${JWT_SECRET}
   expiration: 86400
-
+azure:
+  admin-group-id: ${AZURE_ADMIN_GROUP_ID}
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -34,9 +35,10 @@ spring:
       client:
         registration:
           azure:
+          
             client-id: ${AZURE_CLIENT_ID}
             client-secret: ${AZURE_CLIENT_SECRET}
-            scope: openid, profile, email
+            scope: openid, profile, email, Group.Read.All
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/azure"
         provider:
@@ -54,3 +56,4 @@ spring:
           auth: true
           starttls:
             enable: true
+            
