@@ -6,6 +6,7 @@ import '../App.css';
 import FavoritoService from "../services/FavoritoService";
 import { useCarrito } from "../context/CarritoContext";
 import { useNotificacion } from "../context/NotificacionContext";
+import { resolverImagen } from "../utils/imageUrl";
 
 const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
@@ -83,7 +84,7 @@ const Catalogo = ({ search = "" }) => {
                         >
                             <div style={{ position: 'relative' }}>
                                 <img
-                                    src={planta.image}
+                                    src={resolverImagen(planta.image)}
                                     alt={planta.name}
                                     style={agotado ? { filter: 'grayscale(100%)' } : {}}
                                 />

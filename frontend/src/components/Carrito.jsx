@@ -5,6 +5,7 @@ import api from "../api/axiosConfig";
 import { useCarrito } from "../context/CarritoContext";
 import { useNotificacion } from "../context/NotificacionContext";
 import "../styles/panelCarrito.css";
+import { resolverImagen } from "../utils/imageUrl";
 
 const Carrito = () => {
     const navigate = useNavigate();
@@ -76,7 +77,7 @@ const Carrito = () => {
                 {carrito.map((item) => (
                     <tr key={item.id}>
                         <td style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                            <img src={item.image} alt={item.name} className="item-img" />
+                            <img src={resolverImagen(item.image)} alt={item.name} className="item-img" />
                             <span>{item.name}</span>
                         </td>
                         <td>${item.price.toLocaleString('es-CL')}</td>

@@ -11,7 +11,9 @@ previous=false
 replacing=false
 
 test -r "$env_file"
-for key in DB_HOST DB_USERNAME DB_PASSWORD JWT_SECRET AZURE_TENANT_ID MAIL_USERNAME MAIL_PASSWORD; do
+for key in DB_HOST DB_USERNAME DB_PASSWORD JWT_SECRET AZURE_TENANT_ID \
+           AZURE_CLIENT_ID AZURE_CLIENT_SECRET AZURE_ADMIN_GROUP_ID \
+           MAIL_USERNAME MAIL_PASSWORD; do
     if ! grep -qE "^${key}=.+" "$env_file"; then
         echo "Falta $key en backend.env (formato NOMBRE=valor)." >&2
         exit 1

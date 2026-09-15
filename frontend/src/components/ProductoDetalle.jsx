@@ -6,6 +6,7 @@ import FavoritoService from '../services/FavoritoService';
 import '../styles/panelDetailProducto.css';
 import { useCarrito } from "../context/CarritoContext";
 import { useNotificacion } from "../context/NotificacionContext";
+import { resolverImagen } from "../utils/imageUrl";
 
 const ProductoDetalle = () => {
     const { id } = useParams();
@@ -82,7 +83,7 @@ const ProductoDetalle = () => {
             <div className="producto-detalle">
                 <div className="producto-info">
                     <img
-                        src={planta.image}
+                        src={resolverImagen(planta.image)}
                         alt={planta.name}
                         className="producto-img-detalle"
                         style={agotado ? { filter: 'grayscale(100%)', opacity: 0.7 } : {}}

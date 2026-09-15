@@ -9,8 +9,9 @@ import tempfile
 
 def main():
     required = ["EC2_HOST", "EC2_USERNAME", "EC2_SSH_KEY", "EC2_KNOWN_HOSTS", "BACKEND_IMAGE",
-                "DB_HOST", "DB_USERNAME", "DB_PASSWORD", "JWT_SECRET", "AZURE_TENANT_ID",
-                "MAIL_USERNAME", "MAIL_PASSWORD"]
+            "DB_HOST", "DB_USERNAME", "DB_PASSWORD", "JWT_SECRET", "AZURE_TENANT_ID",
+            "AZURE_CLIENT_ID", "AZURE_CLIENT_SECRET", "AZURE_ADMIN_GROUP_ID",
+            "MAIL_USERNAME", "MAIL_PASSWORD"]
     missing = [name for name in required if not os.environ.get(name)]
     if missing:
         raise SystemExit("Faltan secretos/configuracion: " + ", ".join(missing))
@@ -18,7 +19,8 @@ def main():
     if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9.-]*", host) or not re.fullmatch(r"[a-z_][a-z0-9_-]*", user):
         raise SystemExit("EC2_HOST o EC2_USERNAME no tiene un formato valido")
     keys = ["DB_HOST", "DB_USERNAME", "DB_PASSWORD", "JWT_SECRET", "AZURE_TENANT_ID",
-            "MAIL_USERNAME", "MAIL_PASSWORD"]
+        "AZURE_CLIENT_ID", "AZURE_CLIENT_SECRET", "AZURE_ADMIN_GROUP_ID",
+        "MAIL_USERNAME", "MAIL_PASSWORD"]
     values = {name: os.environ[name] for name in keys}
     for name, value in values.items():
         if any(char in value for char in ("\n", "\r", "\0")):
