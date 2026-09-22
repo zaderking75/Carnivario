@@ -151,3 +151,71 @@
 .user-form button {
     align-self: stretch;
 }
+.stock-batch-bar {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #2c3e50;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 1000;
+    animation: slideUp 0.3s ease-out;
+    max-width: 400px;
+}
+
+.stock-batch-bar h4 {
+    margin: 0;
+    font-size: 16px;
+    color: #27ae60;
+}
+
+.stock-batch-list {
+    max-height: 100px;
+    overflow-y: auto;
+    font-size: 13px;
+    margin: 0;
+    padding-left: 15px;
+}
+
+.stock-batch-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-confirm-batch {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-confirm-batch:hover {
+    background-color: #219653;
+}
+
+.btn-cancel-batch {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cancel-batch:hover {
+    background-color: #c0392b;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

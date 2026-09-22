@@ -620,3 +620,56 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+.notificacion-toast {
+  position: fixed;
+  z-index: 2000;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(380px, calc(100vw - 32px));
+  padding: 14px 18px;
+  color: #fff;
+  background: #1f7a3d;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(16, 61, 31, 0.3);
+  font-size: 0.95rem;
+  font-weight: 600;
+  animation: mostrarNotificacion 0.25s ease-out;
+}
+
+.notificacion-toast-icono {
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  color: #1f7a3d;
+  background: #fff;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+@keyframes mostrarNotificacion {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .notificacion-toast {
+    top: 16px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+}

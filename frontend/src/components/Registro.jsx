@@ -2,9 +2,12 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";;
 import "../styles/panelregistro.css";
+import { useNotificacion } from "../context/NotificacionContext";
 
 function Registro() {
   const navigate = useNavigate();
+
+  const { mostrarNotificacion } = useNotificacion();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -52,108 +55,115 @@ function Registro() {
         address: formData.address,
         commune: formData.commune
       };
-
-      await AuthService.register(usuarioParaEnviar);
-
-      setMensaje("¡Registro exitoso! Redirigiendo al login...");
-      setError(false);
+      
+      const response = await AuthService.register(usuarioParaEnviar);
+      const { token, user } = response.data;
+      
+      AuthService.saveSession(token, user);
+      mostrarNotificacion("¡Registro exitoso! Bienvenido a Carniverio 🌿");
 
       setTimeout(() => {
-        navigate("/login");
+        navigate("/home");
+        window.location.reload();
       }, 1500);
-
     } catch (err) {
-
       console.error(err);
       setError(true);
-
-      const data = err.response?.data;
-      const msgBackend = (typeof data === "string" ? data : data?.message || data?.error)
-        || (!err.response
-          ? "No se pudo conectar con el servidor. Revisa que el backend esté iniciado y que el origen del frontend esté permitido."
-          : `No se pudo registrar el usuario (HTTP ${err.response.status}).`);
+      const msgBackend = err.response?.data?.message || err.response?.data || "Error al registrar usuario.";
       setMensaje("Error: " + msgBackend);
     }
   };
 
   return (
+    <div className="registro-wrapper">
+      <div className="registro-container">
+        <form onSubmit={handleSubmit}>
+          <h2>Registrarse</h2>
 
-      <div className="registro-wrapper">
-        <div className="registro-container">
+          {mensaje && (
+            <div className={error ? "mensaje-error" : "mensaje-exito"}>
+              {mensaje}
+            </div>
+          )}
 
-          <form onSubmit={handleSubmit}>
-            <h2>Registrarse</h2>
-
-
-            {mensaje && (
-                <div className={error ? "mensaje-error" : "mensaje-exito"} style={{marginBottom: '15px'}}>
-                  {mensaje}
-                </div>
-            )}
-
-            <label>Nombre</label>
-            <input
+          <div className="form-row">
+            <div className="form-group">
+              <label>Nombre</label>
+              <input
                 type="text"
                 name="name"
                 placeholder="Tu nombre"
                 value={formData.name}
                 onChange={handleChange}
                 required
-            />
-
-            <label>Apellido</label>
-            <input
+              />
+            </div>
+            <div className="form-group">
+              <label>Apellido</label>
+              <input
                 type="text"
                 name="lastname"
                 placeholder="Tu apellido"
                 value={formData.lastname}
                 onChange={handleChange}
                 required
-            />
+              />
+            </div>
+          </div>
 
+          <div className="form-group form-group-full">
             <label>Email</label>
             <input
-                type="email"
-                name="email"
-                placeholder="correo@ejemplo.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
+              type="email"
+              name="email"
+              placeholder="correo@ejemplo.com"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
+          </div>
 
-
-            <label>Teléfono</label>
-            <input
+          <div className="form-row">
+            <div className="form-group">
+              <label>Teléfono</label>
+              <input
                 type="text"
                 name="phone"
                 placeholder="+56 9 ..."
                 value={formData.phone}
                 onChange={handleChange}
                 required
-            />
-
-            <label>Dirección</label>
-            <input
-                type="text"
-                name="address"
-                placeholder="Calle, Número"
-                value={formData.address}
-                onChange={handleChange}
-                required
-            />
-
-            <label>Comuna</label>
-            <input
+              />
+            </div>
+            <div className="form-group">
+              <label>Comuna</label>
+              <input
                 type="text"
                 name="commune"
                 placeholder="Comuna"
                 value={formData.commune}
                 onChange={handleChange}
                 required
-            />
+              />
+            </div>
+          </div>
 
-            <label>Contraseña</label>
+          <div className="form-group form-group-full">
+            <label>Dirección</label>
             <input
+              type="text"
+              name="address"
+              placeholder="Calle, Número"
+              value={formData.address}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>Contraseña</label>
+              <input
                 type="password"
                 name="password"
                 placeholder="Mínimo 6 caracteres"
@@ -162,30 +172,33 @@ function Registro() {
                 required
                 minLength={6}
                 title="La contraseña debe tener al menos 6 caracteres"
-            />
-
-            <label>Confirmar Contraseña</label>
-            <input
+              />
+            </div>
+            <div className="form-group">
+              <label>Confirmar</label>
+              <input
                 type="password"
                 name="confirmarPassword"
                 placeholder="Repite tu contraseña"
                 value={formData.confirmarPassword}
                 onChange={handleChange}
                 required
-            />
+              />
+            </div>
+          </div>
 
-            <button type="submit">Registrarse</button>
+          <button type="submit">Registrarse</button>
 
-            <button
-                type="button"
-                className="login-link"
-                onClick={() => navigate("/login")}
-            >
-              ¿Ya tienes cuenta? Iniciar sesión
-            </button>
-          </form>
-        </div>
+          <button
+            type="button"
+            className="login-link"
+            onClick={() => navigate("/login")}
+          >
+            ¿Ya tienes cuenta? Iniciar sesión
+          </button>
+        </form>
       </div>
+    </div>
   );
 }
 

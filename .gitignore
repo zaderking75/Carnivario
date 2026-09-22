@@ -1,4 +1,12 @@
 # Logs
+# Local secrets
+**/.env
+**/.env.*
+!**/.env.example
+!frontend/.env.production
+!frontend/.env.development
+**/backend.env
+
 logs
 *.log
 npm-debug.log*
@@ -13,7 +21,6 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store

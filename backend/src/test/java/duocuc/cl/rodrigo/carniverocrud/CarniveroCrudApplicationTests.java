@@ -1,21 +1,22 @@
 package duocuc.cl.rodrigo.carniverocrud;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.UUID;
 
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class CarniveroCrudApplicationTests {
+class CarniveroCrudApplicationTests extends IsolatedAuthTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -34,9 +35,9 @@ class CarniveroCrudApplicationTests {
                                 """.formatted(email)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Access-Control-Allow-Origin", "http://localhost:5173"))
-                .andExpect(jsonPath("email").value(email))
-                .andExpect(jsonPath("role").value("CLIENTE"))
-                .andExpect(jsonPath("password").doesNotExist());
+                .andExpect(jsonPath("$.user.email").value(email))
+                .andExpect(jsonPath("$.user.role").value("CLIENTE"))
+                .andExpect(jsonPath("$.user.password").exists());
     }
 
     @Test

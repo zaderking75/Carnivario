@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate,useLocation} from "react-router-dom";
 import AuthService from "../services/AuthService";
 import "../App.css";
+import { useCarrito } from "../context/CarritoContext"
 
 const Header = ({search, setSearch}) => {
     const location = useLocation();
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(AuthService.getCurrentUser());
-    const [cantidadCarrito, setCantidadCarrito] = useState(0);
-    const mostrarBarra = location.pathname === "/" || location.pathname === "/catalogo";
+    const { cantidadTotal } = useCarrito();
+    const mostrarBarra = location.pathname === "/" || location.pathname === "/home" || location.pathname === "/catalogo";
     const isAdmin = AuthService.isAdmin();
 
     useEffect(() => {
@@ -16,12 +17,6 @@ const Header = ({search, setSearch}) => {
         if (userStored) {
             setUsuario(userStored);
         }
-        const carritoStored = JSON.parse(localStorage.getItem("carrito") || "[]");
-        const totalUnidades = carritoStored.reduce((acumulador, item) => {
-            return acumulador + parseInt(item.cantidad || 0);
-        }, 0);
-
-        setCantidadCarrito(totalUnidades);
     }, []);
     const handleLogoClick = () => {
         if (isAdmin) {
@@ -30,8 +25,8 @@ const Header = ({search, setSearch}) => {
             navigate("/");
         }
     };
-    const handleLogout = () => {
-        AuthService.logout();
+    const handleLogout = async () => {
+        await AuthService.logout();
         setUsuario(null);
         navigate("/");
     };
@@ -60,13 +55,22 @@ const Header = ({search, setSearch}) => {
                 {!isAdmin && (
                     <>
                         <div className="icon-cart" title="Carrito" onClick={() => navigate("/carrito")}>
-                            <span className="carrito-contador">{cantidadCarrito}</span>
+                            <span className="carrito-contador">{cantidadTotal}</span>{}
                         </div>
 
                         <div className="icon-heart" title="Favoritos" onClick={() => navigate("/favoritos")}></div>
                     </>
                 )}
                 {isAdmin && (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/home")}
+                        style={{ fontSize: "0.8rem", padding: "6px 10px", cursor: "pointer", marginRight: "6px" }}
+                    >
+                        Home
+                    </button>
+
                     <button
                         type="button"
                         onClick={() => navigate("/admin")}
@@ -74,26 +78,29 @@ const Header = ({search, setSearch}) => {
                     >
                         Admin
                     </button>
-                )}
+                </>
+            )}
                 <div className="perfil-contenedor" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                    {usuario ? (
-                        <>
-                            <span className="nav-icon" style={{ fontSize: "1.5rem" }} onClick={() => navigate("/perfil")}>👤</span>
-                            <span style={{ fontSize: "0.8rem", color: "#ff5722" }}>{usuario.name || usuario.name}</span>
-                            <button
-                                onClick={handleLogout}
-                                style={{ fontSize: "0.7rem", padding: "2px 5px", marginTop: "5px", cursor: "pointer" }}
-                            >
-                                Salir
-                            </button>
-                        </>
-                    ) : (
-                        <div onClick={() => navigate("/login")} style={{ cursor: "pointer", textAlign: "center" }}>
-                            <span className="nav-icon" style={{ fontSize: "1.5rem" }}>👤</span>
-                            <span style={{ display: "block", fontSize: "0.8rem" }}>Ingresar</span>
-                        </div>
-                    )}
+            {usuario ? (
+            <>
+            <span className="nav-icon" style={{ fontSize: "1.5rem" }} onClick={() => navigate("/perfil")}>👤</span>
+            <span style={{ fontSize: "0.8rem", color: "#ff5722" }}>{usuario.name}</span>
+            {!AuthService.isAdmin() && (
+                <button
+                    onClick={handleLogout}
+                    style={{ fontSize: "0.7rem", padding: "2px 5px", marginTop: "5px", cursor: "pointer" }}
+                >
+                    Salir
+                </button>)
+            }
+            </>
+            ) : (
+                <div onClick={() => navigate("/login")} style={{ cursor: "pointer", textAlign: "center" }}>
+                    <span className="nav-icon" style={{ fontSize: "1.5rem" }}>👤</span>
+                    <span style={{ display: "block", fontSize: "0.8rem" }}>Ingresar</span>
                 </div>
+            )}
+            </div>
             </div>
         </header>
     );

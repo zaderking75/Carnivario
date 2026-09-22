@@ -16,9 +16,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import duocuc.cl.rodrigo.carniverocrud.models.request.UpdateProfileRequest;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.oauth2.jwt.Jwt;
+import java.util.UUID;
 
 @Service
 public class UsuarioService {
@@ -43,6 +46,11 @@ public class UsuarioService {
         // 3. Genera el JWT usando email y rol
         return jwtProvider.generateToken(usuario.getEmail());
     }
+    
+    public String registrarUsuarioYGenerarToken(RegisterRequest request) {
+        Usuario nuevoUsuario = registrarUsuario(request);
+        return jwtProvider.generateToken(nuevoUsuario.getEmail());
+    }   
     public Usuario registrarUsuario(RegisterRequest request) {
         return registrarUsuario(request, "CLIENTE");
     }
@@ -92,4 +100,148 @@ public class UsuarioService {
 
         return normalizedRole;
     }
+
+    public Usuario actualizarPerfil(String email, UpdateProfileRequest request) {
+    Usuario usuario = getUsuarioByEmail(email);
+
+    usuario.setName(validarCampo(request.getName(), "nombre", 50));
+    usuario.setLastname(validarCampo(request.getLastname(), "apellido", 50));
+    usuario.setPhone(validarCampo(request.getPhone(), "teléfono", 50));
+    usuario.setAddress(validarCampo(request.getAddress(), "dirección", 50));
+    usuario.setCommune(validarCampo(request.getCommune(), "comuna", 50));
+
+    return usuarioJpaRepository.save(usuario);
+    }
+    public Usuario actualizarUsuarioPorId(Integer id, RegisterRequest request) {
+        Usuario usuario = getUsuarioById(id);
+
+        usuario.setName(validarCampo(request.getName(), "nombre", 50));
+        usuario.setLastname(validarCampo(request.getLastname(), "apellido", 50));
+        usuario.setEmail(validarCampo(request.getEmail(), "email", 100));
+        usuario.setPhone(validarCampo(request.getPhone(), "teléfono", 50));
+        usuario.setAddress(validarCampo(request.getAddress(), "dirección", 50));
+        usuario.setCommune(validarCampo(request.getCommune(), "comuna", 50));
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            usuario.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        return usuarioJpaRepository.save(usuario);
+    }
+    public boolean deleteUsuario(Integer id) {
+        Usuario usuario = getUsuarioById(id);
+        usuarioJpaRepository.delete(usuario);
+        return true;
+    }
+
+    private String validarCampo(String valor, String nombreCampo, int largoMaximo) {
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                "El campo " + nombreCampo + " es obligatorio"
+            );
+        }
+
+    String valorLimpio = valor.trim();
+
+    if (valorLimpio.length() > largoMaximo) {
+        throw new IllegalArgumentException(
+            "El campo " + nombreCampo +
+            " no puede superar los " + largoMaximo + " caracteres"
+        );
+    }
+
+    return valorLimpio;
+    }
+
+
+public Usuario obtenerOCrearUsuarioMicrosoft(Jwt jwt) {
+
+    String email = jwt.getClaimAsString(
+            "preferred_username"
+    );
+
+    if (email == null || email.isBlank()) {
+        email = jwt.getClaimAsString("email");
+    }
+
+    if (email == null || email.isBlank()) {
+        throw new IllegalArgumentException(
+                "El token de Microsoft no contiene preferred_username ni email"
+        );
+    }
+
+    String givenName =
+            jwt.getClaimAsString("given_name");
+
+    String familyName =
+            jwt.getClaimAsString("family_name");
+
+    String fullName =
+            jwt.getClaimAsString("name");
+
+    List<String> roles =
+            jwt.getClaimAsStringList("roles");
+
+    String azureRole =
+            roles != null && roles.contains("ADMIN")
+                    ? "ADMIN"
+                    : "CLIENTE";
+
+    final String resolvedEmail = email;
+    final String resolvedGivenName = givenName;
+    final String resolvedFamilyName = familyName;
+    final String resolvedFullName = fullName;
+
+    return usuarioJpaRepository
+            .findByEmail(resolvedEmail)
+            .map(existingUser -> {
+
+                // Azure es la fuente del rol cuando se entra por Microsoft
+                if (!azureRole.equals(existingUser.getRole())) {
+                    existingUser.setRole(azureRole);
+                    return usuarioJpaRepository.save(existingUser);
+                }
+
+                return existingUser;
+            })
+            .orElseGet(() -> {
+
+                Usuario nuevo = new Usuario();
+
+                nuevo.setEmail(resolvedEmail);
+
+                nuevo.setName(
+                        resolvedGivenName != null
+                                && !resolvedGivenName.isBlank()
+                                ? resolvedGivenName
+                                : (
+                                    resolvedFullName != null
+                                    && !resolvedFullName.isBlank()
+                                        ? resolvedFullName
+                                        : "Usuario Microsoft"
+                                  )
+                );
+
+                nuevo.setLastname(
+                        resolvedFamilyName != null
+                                ? resolvedFamilyName
+                                : ""
+                );
+
+                nuevo.setRole(azureRole);
+
+                // Contraseña aleatoria: la cuenta Microsoft no la usa
+                nuevo.setPassword(
+                        passwordEncoder.encode(
+                                UUID.randomUUID().toString()
+                        )
+                );
+
+                nuevo.setPhone("");
+                nuevo.setAddress("");
+                nuevo.setCommune("");
+
+                return usuarioJpaRepository.save(nuevo);
+            });
+}
 }

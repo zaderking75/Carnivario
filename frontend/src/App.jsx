@@ -10,7 +10,10 @@ import Favoritos from './components/Favoritos';
 import ProductoDetalle from "./components/ProductoDetalle";
 import AdminDashboard from './components/AdminDashboard';
 import AuthService from './services/AuthService';
+import Perfil from "./components/Perfil";
 import './App.css';
+import { CarritoProvider } from './context/CarritoContext';
+import { NotificacionProvider } from './context/NotificacionContext';
 
 const AdminRoute = ({ children }) => {
     return AuthService.isAdmin() ? children : <Navigate to="/login" replace />;
@@ -19,6 +22,8 @@ const AdminRoute = ({ children }) => {
 function App() {
     const [search, setSearch] = useState("");
   return (
+     <CarritoProvider>
+      <NotificacionProvider>
       <BrowserRouter>
           <Header search={search} setSearch={setSearch} />
 
@@ -32,11 +37,14 @@ function App() {
               <Route path="/carrito" element={<Carrito />} />
               <Route path="/favoritos" element={<Favoritos />} />
               <Route path="/producto/:id" element={<ProductoDetalle />} />
+              <Route path="/perfil" element={<Perfil />} />
               <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           </Routes>
         </main>
         <Footer />
       </BrowserRouter>
+      </NotificacionProvider>
+    </CarritoProvider>
   );
 }
 

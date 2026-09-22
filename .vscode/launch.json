@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "CarniveroCrudApplication",
+            "request": "launch",
+            "mainClass": "duocuc.cl.rodrigo.carniverocrud.CarniveroCrudApplication",
+            "projectName": "CarniveroCrud",
+            "cwd": "${workspaceFolder}/backend",
+            "envFile": "${workspaceFolder}/backend/.env"
+        }
+    ]
+}

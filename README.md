@@ -1,6 +1,31 @@
 # proyecto_pagina_Tienda
 .
 
+## Publicar imágenes en Docker Hub
+
+El workflow `.github/workflows/docker-publish.yml` construye y publica ambas
+imágenes con cada push a `Develop` o `main`. También permite ejecución manual
+desde GitHub Actions cuando el workflow está en la rama predeterminada.
+
+Utiliza los secretos de Actions `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN`
+(token de Docker Hub con permiso de escritura). Si los secretos existentes
+tienen otros nombres, cambia las referencias en el workflow.
+
+Imágenes publicadas:
+
+- `<usuario>/carnivario-backend:latest`
+- `<usuario>/carnivario-frontend:latest`
+
+También se publica una etiqueta con el SHA del commit. `latest` corresponde
+a la última publicación, sea de `Develop` o de `main`.
+
+No requiere Docker Compose. El backend escucha en el puerto 8081 y el frontend
+en el 80. La compilación del backend omite tests; al ejecutar el contenedor
+debes proporcionar las variables de base de datos, JWT, Azure y correo de
+`backend/src/main/resources/application.yml`. No se incluyen archivos `.env`
+en las imágenes. La URL de API del frontend sigue definida en
+`frontend/src/api/axiosConfig.js`.
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

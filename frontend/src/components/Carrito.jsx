@@ -1,77 +1,50 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";
-import CompraService from "../services/CompraService";
+import api from "../api/axiosConfig";
+import { useCarrito } from "../context/CarritoContext";
+import { useNotificacion } from "../context/NotificacionContext";
 import "../styles/panelCarrito.css";
+import { resolverImagen } from "../utils/imageUrl";
 
 const Carrito = () => {
     const navigate = useNavigate();
-    const [carrito, setCarrito] = useState([]);
-    const [total, setTotal] = useState(0);
-
-    useEffect(() => {
-        const carritoGuardado = JSON.parse(localStorage.getItem("carrito")) || [];
-        setCarrito(carritoGuardado);
-        calcularTotal(carritoGuardado);
-    }, []);
-
-    const calcularTotal = (items) => {
-        const suma = items.reduce((acc, item) => acc + (item.price * item.cantidad), 0);
-        setTotal(suma);
-    };
-
-    const modificarCantidad = (id, delta) => {
-        const nuevoCarrito = carrito.map(item => {
-            if (item.id === id) {
-                const nuevaCant = item.cantidad + delta;
-                return { ...item, cantidad: nuevaCant < 1 ? 1 : nuevaCant };
-            }
-            return item;
-        });
-        setCarrito(nuevoCarrito);
-        localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-        calcularTotal(nuevoCarrito);
-    };
-
-    const eliminarProducto = (id) => {
-        const nuevoCarrito = carrito.filter(item => item.id !== id);
-        setCarrito(nuevoCarrito);
-        localStorage.setItem("carrito", JSON.stringify(nuevoCarrito));
-        calcularTotal(nuevoCarrito);
-        window.location.reload();
-    };
+    const { carrito, modificarCantidad, eliminarProducto, vaciarCarrito, total } = useCarrito();
+    const { mostrarNotificacion } = useNotificacion();
+    const [loading, setLoading] = useState(false);
 
     const handleCheckout = async () => {
+        if (loading) return;
         const usuario = AuthService.getCurrentUser();
         if (!usuario) {
-            alert("Debes iniciar sesión para comprar.");
+            mostrarNotificacion("Debes iniciar sesión para comprar.", "error");
             navigate("/login");
             return;
         }
+        setLoading(true);
 
         try {
-            for (const item of carrito) {
-                const compraRequest = {
-                    idPlanta: item.id,
-                    quantity: item.cantidad
-                };
-                await CompraService.createPurchase(compraRequest);
-            }
+            const items = carrito.map(item => ({
+                idPlanta: item.id,
+                cantidad: item.cantidad
+            }));
 
-            alert("¡Compra realizada con éxito! Gracias por tu preferencia.");
+            await api.post("/checkout/api", { items });
 
-            localStorage.removeItem("carrito");
-            setCarrito([]);
-            setTotal(0);
-            window.location.reload();
+            mostrarNotificacion("¡Compra realizada con éxito! Revisa tu correo para la confirmación.");
+
+            vaciarCarrito(); 
+            navigate("/home");
 
         } catch (error) {
             console.error("Error al comprar:", error);
             if (error.response && error.response.status === 400) {
-                alert("Error: " + (error.response.data?.message || error.response.data));
+                mostrarNotificacion("Error: " + (error.response.data?.message || error.response.data), "error");
             } else {
-                alert("Hubo un error al procesar la compra. Intenta de nuevo.");
+                mostrarNotificacion("Hubo un error al procesar la compra. Intenta de nuevo.", "error");
             }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -104,18 +77,18 @@ const Carrito = () => {
                 {carrito.map((item) => (
                     <tr key={item.id}>
                         <td style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-                            <img src={item.image} alt={item.name} className="item-img" />
+                            <img src={resolverImagen(item.image)} alt={item.name} className="item-img" />
                             <span>{item.name}</span>
                         </td>
                         <td>${item.price.toLocaleString('es-CL')}</td>
                         <td>
-                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, -1)}>-</button>
+                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, -1)} disabled={loading}>-</button>
                             {item.cantidad}
-                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, 1)}>+</button>
+                            <button className="btn-cantidad" onClick={() => modificarCantidad(item.id, 1)} disabled={loading}>+</button>
                         </td>
                         <td>${(item.price * item.cantidad).toLocaleString('es-CL')}</td>
                         <td>
-                            <button className="btn-eliminar" onClick={() => eliminarProducto(item.id)}>🗑️</button>
+                            <button className="btn-eliminar" onClick={() => eliminarProducto(item.id)} disabled={loading}>🗑️</button>
                         </td>
                     </tr>
                 ))}
@@ -124,7 +97,9 @@ const Carrito = () => {
 
             <div className="carrito-resumen">
                 <h2>Total: ${total.toLocaleString('es-CL')}</h2>
-                <button className="btn-checkout" onClick={handleCheckout}>Finalizar Compra</button>
+                <button className="btn-checkout" onClick={handleCheckout} disabled={loading}>
+                    {loading ? "Procesando..." : "Finalizar Compra"}
+                </button>
             </div>
         </div>
     );

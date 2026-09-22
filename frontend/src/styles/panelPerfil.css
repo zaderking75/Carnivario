@@ -1,0 +1,335 @@
+.perfil-pagina {
+    min-height: 75vh;
+    padding: 42px 24px 70px;
+    color: #203129;
+    background:
+        radial-gradient(circle at top right, rgba(132, 194, 137, 0.25), transparent 32%),
+        #f3f7f3;
+}
+
+.perfil-cabecera,
+.perfil-contenido {
+    width: min(1120px, 100%);
+    margin: 0 auto;
+}
+
+.perfil-cabecera {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 30px;
+    border-radius: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, #173d29 0%, #287047 58%, #3f8d58 100%);
+    box-shadow: 0 16px 40px rgba(22, 64, 40, 0.2);
+}
+
+.perfil-volver {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 8px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.13);
+    cursor: pointer;
+}
+
+.perfil-avatar {
+    display: grid;
+    flex: 0 0 92px;
+    width: 92px;
+    height: 92px;
+    place-items: center;
+    border: 3px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    color: #214f32;
+    background: #e7f4e8;
+    font-size: 2rem;
+    font-weight: 800;
+}
+
+.perfil-identidad h1 {
+    margin: 4px 0 3px;
+    text-align: left;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+}
+
+.perfil-identidad p {
+    margin: 0 0 9px;
+    color: #d7eadb;
+}
+
+.perfil-etiqueta {
+    color: #bfe5c7;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+
+.perfil-rol {
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 99px;
+    color: #173d29;
+    background: #dff1df;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.perfil-contenido {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 24px;
+}
+
+.perfil-menu,
+.perfil-tarjeta {
+    border: 1px solid #dfe8df;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(36, 73, 49, 0.08);
+}
+
+.perfil-menu {
+    align-self: start;
+    padding: 12px;
+}
+
+.perfil-menu button {
+    width: 100%;
+    padding: 13px 14px;
+    border: 0;
+    border-radius: 9px;
+    color: #42534a;
+    background: transparent;
+    text-align: left;
+    font-size: 0.92rem;
+    cursor: pointer;
+}
+
+.perfil-menu button:hover,
+.perfil-menu .perfil-menu-activo {
+    color: #1d6339;
+    background: #edf7ee;
+}
+
+.perfil-menu .perfil-cerrar-sesion {
+    margin-top: 12px;
+    border-top: 1px solid #edf0ed;
+    border-radius: 0 0 9px 9px;
+    color: #b2372f;
+}
+
+.perfil-tarjeta {
+    padding: 30px;
+}
+
+.perfil-tarjeta-titulo {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e7ece8;
+}
+
+.perfil-tarjeta-titulo h2 {
+    margin: 0 0 6px;
+    color: #203a2c;
+    font-size: 1.45rem;
+}
+
+.perfil-tarjeta-titulo p {
+    margin: 0;
+    color: #708078;
+    line-height: 1.5;
+}
+
+.perfil-editar,
+.perfil-guardar,
+.perfil-cancelar {
+    padding: 11px 18px;
+    border-radius: 9px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.perfil-editar,
+.perfil-guardar {
+    border: 1px solid #2b7548;
+    color: #fff;
+    background: #2b7548;
+}
+
+.perfil-editar:hover,
+.perfil-guardar:hover {
+    background: #205c38;
+}
+
+.perfil-formulario {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    padding-top: 24px;
+}
+
+.perfil-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.perfil-campo-completo,
+.perfil-acciones {
+    grid-column: 1 / -1;
+}
+
+.perfil-campo label {
+    color: #344a3e;
+    font-size: 0.84rem;
+    font-weight: 700;
+}
+
+.perfil-campo input {
+    width: 100%;
+    min-height: 45px;
+    padding: 11px 13px;
+    border: 1px solid #cbd8ce;
+    border-radius: 9px;
+    outline: none;
+    color: #23382c;
+    background: #fff;
+    font-size: 0.95rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.perfil-campo input:focus {
+    border-color: #3b8958;
+    box-shadow: 0 0 0 3px rgba(59, 137, 88, 0.12);
+}
+
+.perfil-campo input:disabled {
+    border-color: #e2e8e3;
+    color: #4d5e54;
+    background: #f5f7f5;
+    opacity: 1;
+}
+
+.perfil-campo small {
+    color: #7d8a82;
+    font-size: 0.75rem;
+}
+
+.perfil-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 6px;
+}
+
+.perfil-cancelar {
+    border: 1px solid #cbd5ce;
+    color: #46574d;
+    background: #fff;
+}
+
+.perfil-acciones button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.perfil-mensaje {
+    margin-top: 20px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 0.9rem;
+}
+
+.perfil-mensaje-exito {
+    color: #215f37;
+    background: #eaf7ed;
+}
+
+.perfil-mensaje-error {
+    color: #9a302b;
+    background: #fff0ef;
+}
+
+.perfil-cargando {
+    min-height: 65vh;
+    display: grid;
+    place-items: center;
+    color: #2b7548;
+    background: #f3f7f3;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .perfil-pagina {
+        padding: 22px 14px 45px;
+    }
+
+    .perfil-cabecera {
+        align-items: flex-start;
+        padding: 56px 22px 25px;
+    }
+
+    .perfil-avatar {
+        flex-basis: 70px;
+        width: 70px;
+        height: 70px;
+        font-size: 1.5rem;
+    }
+
+    .perfil-contenido {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-menu {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .perfil-tarjeta {
+        padding: 22px 17px;
+    }
+
+    .perfil-tarjeta-titulo,
+    .perfil-formulario {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-tarjeta-titulo {
+        flex-direction: column;
+    }
+
+    .perfil-campo,
+    .perfil-campo-completo,
+    .perfil-acciones {
+        grid-column: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .perfil-cabecera {
+        flex-direction: column;
+    }
+
+    .perfil-menu {
+        grid-template-columns: 1fr;
+    }
+
+    .perfil-acciones {
+        flex-direction: column-reverse;
+    }
+
+    .perfil-acciones button,
+    .perfil-editar {
+        width: 100%;
+    }
+}

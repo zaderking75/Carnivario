@@ -21,11 +21,18 @@ const AdminDashboard = () => {
     const [usuarios, setUsuarios] = useState([]);
     const [datosGrafico, setDatosGrafico] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [stockId, setStockId] = useState("");
-    const [stockCant, setStockCant] = useState("");
+    
+    // Estado para acumular cambios de stock pendientes de confirmar
+    const [cambiosStockPendientes, setCambiosStockPendientes] = useState({});
+
+    // Estados para Plantas
     const [newPlanta, setNewPlanta] = useState(initialPlanta);
     const [editandoPlantaId, setEditandoPlantaId] = useState(null);
+
+    // Estados para Usuarios
     const [newUsuario, setNewUsuario] = useState(initialUsuario);
+    const [editandoUsuarioId, setEditandoUsuarioId] = useState(null);
+
     const [mensaje, setMensaje] = useState("");
     const [error, setError] = useState("");
 
@@ -45,10 +52,6 @@ const AdminDashboard = () => {
         const data = error?.response?.data;
         if (typeof data === "string") return data;
         return data?.message || data?.error || fallback;
-    };
-
-    const isUnauthorized = (error) => {
-        return error?.response?.status === 403;
     };
 
     const showSuccess = (text) => {
@@ -105,24 +108,46 @@ const AdminDashboard = () => {
         }
     };
 
-    const handleAddStock = async (e) => {
-        e.preventDefault();
-        try {
-            await PlantaService.addStock(stockId, stockCant);
-            showSuccess("Stock actualizado correctamente.");
-            await cargarDatos();
-            setStockId("");
-            setStockCant("");
-        } catch (error) {
-            if (isUnauthorized(error)) {
-                const mensajeNoAutorizado = "No estás autorizado. Solo un ADMIN puede ajustar stock.";
-                alert(mensajeNoAutorizado);
-                showError(mensajeNoAutorizado);
-                return;
+    const handleModificarStockLocal = (id, nombrePlanta, stockActual, cantidad) => {
+        setCambiosStockPendientes(prev => {
+            const cambioActual = prev[id] ? prev[id].cambio : 0;
+            const nuevoCambio = cambioActual + cantidad;
+            
+            if (stockActual + nuevoCambio < 0) {
+                return prev;
             }
 
-            showError(getErrorMessage(error, "Error al actualizar stock."));
+            if (nuevoCambio === 0) {
+                const copia = { ...prev };
+                delete copia[id];
+                return copia;
+            }
+
+            return {
+                ...prev,
+                [id]: { nombre: nombrePlanta, stockActual, cambio: nuevoCambio }
+            };
+        });
+    };
+
+    const confirmarCambiosStock = async () => {
+        try {
+            const promesas = Object.entries(cambiosStockPendientes).map(([id, data]) => {
+                return PlantaService.addStock(id, data.cambio);
+            });
+
+            await Promise.all(promesas);
+
+            showSuccess("¡Stock actualizado masivamente con éxito!");
+            setCambiosStockPendientes({});
+            await cargarDatos();
+        } catch (error) {
+            showError("Error al guardar los cambios de stock.");
         }
+    };
+
+    const cancelarCambiosStock = () => {
+        setCambiosStockPendientes({});
     };
 
     const handleDelete = async (id) => {
@@ -132,13 +157,6 @@ const AdminDashboard = () => {
                 showSuccess("Planta eliminada.");
                 await cargarDatos();
             } catch (error) {
-                if (isUnauthorized(error)) {
-                    const mensajeNoAutorizado = "No estás autorizado. Solo un ADMIN puede eliminar productos.";
-                    alert(mensajeNoAutorizado);
-                    showError(mensajeNoAutorizado);
-                    return;
-                }
-
                 showError(getErrorMessage(error, "Error al eliminar planta."));
             }
         }
@@ -164,15 +182,9 @@ const AdminDashboard = () => {
             }
 
             await cargarPlantas();
-            cancelarEdicion();
+            await cargarDatos();
+            cancelarEdicionPlanta();
         } catch (error) {
-            if (isUnauthorized(error)) {
-                const mensajeNoAutorizado = "No estás autorizado. Solo un ADMIN puede agregar o editar productos.";
-                alert(mensajeNoAutorizado);
-                showError(mensajeNoAutorizado);
-                return;
-            }
-
             showError(getErrorMessage(error, editandoPlantaId ? "Error al editar planta." : "Error al crear planta."));
         }
     };
@@ -194,28 +206,59 @@ const AdminDashboard = () => {
         setError("");
     };
 
-    const cancelarEdicion = () => {
+    const cancelarEdicionPlanta = () => {
         setEditandoPlantaId(null);
         setNewPlanta(initialPlanta);
         setSelectedFile(null);
+        setActiveTab("inventario");
     };
 
-    const handleCreateUsuario = async (e) => {
+    const handleGuardarUsuario = async (e) => {
         e.preventDefault();
         try {
-            await AuthService.createUser(newUsuario);
-            showSuccess("Usuario creado correctamente.");
+            if (editandoUsuarioId) {
+                await AuthService.updateUser(editandoUsuarioId, newUsuario);
+                showSuccess("Usuario actualizado correctamente.");
+            } else {
+                await AuthService.createUser(newUsuario);
+                showSuccess("Usuario creado correctamente.");
+            }
             setNewUsuario(initialUsuario);
+            setEditandoUsuarioId(null);
             await cargarUsuarios();
         } catch (error) {
-            if (isUnauthorized(error)) {
-                const mensajeNoAutorizado = "No estás autorizado. Solo un ADMIN puede crear usuarios.";
-                alert(mensajeNoAutorizado);
-                showError(mensajeNoAutorizado);
-                return;
-            }
+            showError(getErrorMessage(error, "Error al guardar usuario."));
+        }
+    };
 
-            showError(getErrorMessage(error, "Error al crear usuario."));
+    const iniciarEdicionUsuario = (usuario) => {
+        setEditandoUsuarioId(usuario.id);
+        setNewUsuario({
+            name: usuario.name || "",
+            lastname: usuario.lastname || "",
+            email: usuario.email || "",
+            password: "",
+            phone: usuario.phone || "",
+            address: usuario.address || "",
+            commune: usuario.commune || "",
+            role: usuario.role || "CLIENTE"
+        });
+    };
+
+    const cancelarEdicionUsuario = () => {
+        setEditandoUsuarioId(null);
+        setNewUsuario(initialUsuario);
+    };
+
+    const handleDeleteUsuario = async (id) => {
+        if(window.confirm("¿Seguro que quieres eliminar este usuario?")) {
+            try {
+                await AuthService.deleteUser(id);
+                showSuccess("Usuario eliminado correctamente.");
+                await cargarUsuarios();
+            } catch (error) {
+                showError(getErrorMessage(error, "Error al eliminar usuario."));
+            }
         }
     };
 
@@ -225,25 +268,34 @@ const AdminDashboard = () => {
             showSuccess("Rol actualizado correctamente.");
             await cargarUsuarios();
         } catch (error) {
-            if (isUnauthorized(error)) {
-                const mensajeNoAutorizado = "No estás autorizado. Solo un ADMIN puede cambiar roles.";
-                alert(mensajeNoAutorizado);
-                showError(mensajeNoAutorizado);
-                return;
-            }
-
             showError(getErrorMessage(error, "Error al cambiar rol."));
         }
+    };
+
+    // --- FUNCIÓN DE CERRAR SESIÓN ---
+    const handleCerrarSesion = () => {
+        AuthService.logout();
+        navigate("/login");
+        window.location.reload();
     };
 
     return (
         <div className="admin-container">
             <div className="admin-sidebar">
-                <h2>Panel Admin</h2>
-                <button onClick={() => setActiveTab('resumen')} className={activeTab === 'resumen' ? 'active' : ''}>Resumen</button>
-                <button onClick={() => setActiveTab('inventario')} className={activeTab === 'inventario' ? 'active' : ''}>Inventario & Stock</button>
-                <button onClick={() => setActiveTab('crear')} className={activeTab === 'crear' ? 'active' : ''}>Producto</button>
-                <button onClick={() => setActiveTab('usuarios')} className={activeTab === 'usuarios' ? 'active' : ''}>Usuarios</button>
+                <div className="sidebar-top">
+                    <h2>Panel Admin</h2>
+                    <button onClick={() => setActiveTab('resumen')} className={activeTab === 'resumen' ? 'active' : ''}>Resumen</button>
+                    <button onClick={() => setActiveTab('inventario')} className={activeTab === 'inventario' ? 'active' : ''}>Inventario & Stock</button>
+                    <button onClick={() => setActiveTab('crear')} className={activeTab === 'crear' ? 'active' : ''}>Producto</button>
+                    <button onClick={() => setActiveTab('usuarios')} className={activeTab === 'usuarios' ? 'active' : ''}>Usuarios</button>
+                </div>
+
+                {/* 👇 BOTÓN DE CERRAR SESIÓN UBICADO AL FINAL DEL SIDEBAR */}
+                <div className="sidebar-bottom">
+                    <button onClick={handleCerrarSesion} className="btn-logout-sidebar">
+                        Cerrar Sesión
+                    </button>
+                </div>
             </div>
 
             <div className="admin-content">
@@ -254,7 +306,6 @@ const AdminDashboard = () => {
                     <div>
                         <h1>Rendimiento de Ventas</h1>
                         <p>Comparativa: Cuánto has vendido vs. Cuánto te queda.</p>
-
                         <div className="chart-panel">
                             <ResponsiveContainer>
                                 <BarChart data={datosGrafico}>
@@ -274,41 +325,78 @@ const AdminDashboard = () => {
                 {activeTab === 'inventario' && (
                     <div>
                         <h1>Gestión de Inventario</h1>
-
-                        <div className="card-admin">
-                            <h3>Ajustar Stock Rápido</h3>
-                            <form onSubmit={handleAddStock} className="inline-admin-form">
-                                <input type="number" placeholder="ID Planta" value={stockId} onChange={e=>setStockId(e.target.value)} required />
-                                <input type="number" placeholder="Ajuste (+/-)" value={stockCant} onChange={e=>setStockCant(e.target.value)} required />
-                                <button type="submit" className="btn-green">Actualizar</button>
-                            </form>
-                        </div>
+                        <p>Usa las flechas para ajustar el stock. Los cambios se guardarán cuando confirmes en la barra flotante.</p>
 
                         <table className="admin-table">
                             <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Nombre</th>
-                                <th>Stock</th>
+                                <th>Stock Actual</th>
+                                <th>Ajustar Stock</th>
                                 <th>Precio</th>
                                 <th>Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {plantas.map(p => (
-                                <tr key={p.id}>
-                                    <td>{p.id}</td>
-                                    <td>{p.name}</td>
-                                    <td style={{fontWeight:'bold', color: p.stock < 5 ? 'red' : 'green'}}>{p.stock}</td>
-                                    <td>${Number(p.price || 0).toLocaleString('es-CL')}</td>
-                                    <td className="table-actions">
-                                        <button className="btn-green" onClick={() => iniciarEdicion(p)}>Editar</button>
-                                        <button className="btn-red" onClick={() => handleDelete(p.id)}>Eliminar</button>
-                                    </td>
-                                </tr>
-                            ))}
+                            {plantas.map(p => {
+                                const pendiente = cambiosStockPendientes[p.id];
+                                const stockVisual = p.stock + (pendiente ? pendiente.cambio : 0);
+
+                                return (
+                                    <tr key={p.id}>
+                                        <td>{p.id}</td>
+                                        <td>{p.name}</td>
+                                        <td style={{fontWeight:'bold', color: stockVisual < 5 ? 'red' : 'green'}}>
+                                            {stockVisual} {pendiente && <span style={{color: '#e67e22', fontSize: '11px'}}>(Modificado)</span>}
+                                        </td>
+                                        <td>
+                                            <div style={{display: 'flex', gap: '5px'}}>
+                                                <button 
+                                                    className="btn-green" 
+                                                    style={{padding: '2px 8px'}} 
+                                                    title="Aumentar stock en 1"
+                                                    onClick={() => handleModificarStockLocal(p.id, p.name, p.stock, 1)}
+                                                >
+                                                    ▲
+                                                </button>
+                                                <button 
+                                                    className="btn-red" 
+                                                    style={{padding: '2px 8px'}} 
+                                                    title="Reducir stock en 1"
+                                                    onClick={() => handleModificarStockLocal(p.id, p.name, p.stock, -1)}
+                                                >
+                                                    ▼
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td>${Number(p.price || 0).toLocaleString('es-CL')}</td>
+                                        <td className="table-actions">
+                                            <button className="btn-green" onClick={() => iniciarEdicion(p)}>Editar</button>
+                                            <button className="btn-red" onClick={() => handleDelete(p.id)}>Eliminar</button>
+                                        </td>
+                                    </tr>
+                                );
+                            })}
                             </tbody>
                         </table>
+
+                        {Object.keys(cambiosStockPendientes).length > 0 && (
+                            <div className="stock-batch-bar">
+                                <h4>📋 Resumen de cambios pendientes:</h4>
+                                <ul className="stock-batch-list">
+                                    {Object.entries(cambiosStockPendientes).map(([id, data]) => (
+                                        <li key={id}>
+                                            <b>{data.nombre}</b>: {data.cambio > 0 ? `+${data.cambio}` : data.cambio} unidades (Total: {data.stockActual + data.cambio})
+                                        </li>
+                                    ))}
+                                </ul>
+                                <div className="stock-batch-actions">
+                                    <button className="btn-cancel-batch" onClick={cancelarCambiosStock}>Cancelar</button>
+                                    <button className="btn-confirm-batch" onClick={confirmarCambiosStock}>Confirmar y Guardar Stock</button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -327,7 +415,7 @@ const AdminDashboard = () => {
 
                             <div className="form-actions">
                                 <button type="submit" className="btn-green">{editandoPlantaId ? "Guardar Cambios" : "Guardar Planta"}</button>
-                                {editandoPlantaId && <button type="button" className="btn-secondary" onClick={cancelarEdicion}>Cancelar</button>}
+                                <button type="button" className="btn-secondary" onClick={cancelarEdicionPlanta}>Cancelar</button>
                             </div>
                         </form>
                     </div>
@@ -336,14 +424,13 @@ const AdminDashboard = () => {
                 {activeTab === 'usuarios' && (
                     <div>
                         <h1>Gestión de Usuarios</h1>
-
                         <div className="card-admin">
-                            <h3>Crear Usuario</h3>
-                            <form className="user-form" onSubmit={handleCreateUsuario}>
+                            <h3>{editandoUsuarioId ? "Editar Usuario" : "Crear Usuario"}</h3>
+                            <form className="user-form" onSubmit={handleGuardarUsuario}>
                                 <input type="text" placeholder="Nombre" value={newUsuario.name} onChange={e => setNewUsuario({...newUsuario, name: e.target.value})} required />
                                 <input type="text" placeholder="Apellido" value={newUsuario.lastname} onChange={e => setNewUsuario({...newUsuario, lastname: e.target.value})} required />
                                 <input type="email" placeholder="Email" value={newUsuario.email} onChange={e => setNewUsuario({...newUsuario, email: e.target.value})} required />
-                                <input type="password" placeholder="Contraseña" value={newUsuario.password} onChange={e => setNewUsuario({...newUsuario, password: e.target.value})} required />
+                                <input type="password" placeholder={editandoUsuarioId ? "Nueva Contraseña (opcional)" : "Contraseña"} value={newUsuario.password} onChange={e => setNewUsuario({...newUsuario, password: e.target.value})} required={!editandoUsuarioId} />
                                 <input type="text" placeholder="Teléfono" value={newUsuario.phone} onChange={e => setNewUsuario({...newUsuario, phone: e.target.value})} required />
                                 <input type="text" placeholder="Dirección" value={newUsuario.address} onChange={e => setNewUsuario({...newUsuario, address: e.target.value})} required />
                                 <input type="text" placeholder="Comuna" value={newUsuario.commune} onChange={e => setNewUsuario({...newUsuario, commune: e.target.value})} required />
@@ -351,7 +438,10 @@ const AdminDashboard = () => {
                                     <option value="CLIENTE">CLIENTE</option>
                                     <option value="ADMIN">ADMIN</option>
                                 </select>
-                                <button type="submit" className="btn-green">Crear Usuario</button>
+                                <div className="form-actions">
+                                    <button type="submit" className="btn-green">{editandoUsuarioId ? "Actualizar Usuario" : "Crear Usuario"}</button>
+                                    {editandoUsuarioId && <button type="button" className="btn-secondary" onClick={cancelarEdicionUsuario}>Cancelar</button>}
+                                </div>
                             </form>
                         </div>
 
@@ -363,6 +453,7 @@ const AdminDashboard = () => {
                                 <th>Email</th>
                                 <th>Rol</th>
                                 <th>Teléfono</th>
+                                <th>Acciones</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -378,6 +469,10 @@ const AdminDashboard = () => {
                                         </select>
                                     </td>
                                     <td>{usuario.phone}</td>
+                                    <td className="table-actions">
+                                        <button className="btn-green" onClick={() => iniciarEdicionUsuario(usuario)}>Editar</button>
+                                        <button className="btn-red" onClick={() => handleDeleteUsuario(usuario.id)}>Eliminar</button>
+                                    </td>
                                 </tr>
                             ))}
                             </tbody>

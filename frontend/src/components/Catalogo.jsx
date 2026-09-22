@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import PlantaService from '../services/PlantaService';
-import { useNavigate } from "react-router-dom";;
+import { useNavigate } from "react-router-dom";
 import AuthService from "../services/AuthService";
 import '../App.css';
 import FavoritoService from "../services/FavoritoService";
+import { useCarrito } from "../context/CarritoContext";
+import { useNotificacion } from "../context/NotificacionContext";
+import { resolverImagen } from "../utils/imageUrl";
 
 const Catalogo = ({ search = "" }) => {
     const [plantas, setPlantas] = useState([]);
@@ -11,9 +14,15 @@ const Catalogo = ({ search = "" }) => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
     const [, setUpdate] = useState(0);
-
+    const { agregarProducto } = useCarrito();
+    const { mostrarNotificacion } = useNotificacion(); 
 
     const handleToggleFavorito = (id) => {
+        if (!AuthService.getCurrentUser()) {
+            mostrarNotificacion("Debes iniciar sesión para guardar favoritos.", "error");
+            navigate("/login");
+            return;
+        }
         FavoritoService.toggleFavorito(id);
         setUpdate(prev => prev + 1);
     };
@@ -39,26 +48,19 @@ const Catalogo = ({ search = "" }) => {
         const usuario = AuthService.getCurrentUser();
 
         if (!usuario) {
-            alert("Debes iniciar sesión para añadir productos al carrito.");
+            mostrarNotificacion("Debes iniciar sesión para añadir productos al carrito.", "error");
             navigate("/login");
             return;
         }
-        let carritoActual = JSON.parse(localStorage.getItem("carrito")) || [];
-        const indice = carritoActual.findIndex(item => item.id === planta.id);
-        if (indice !== -1) {
-            carritoActual[indice].cantidad += 1;
-        } else {
-            carritoActual.push({ ...planta, cantidad: 1 });
-        }
-        localStorage.setItem("carrito", JSON.stringify(carritoActual));
-        alert(`¡${planta.name} añadida al carrito!`);
-        window.location.reload();
-    };
 
+        const resultado = agregarProducto(planta, 1);
+        mostrarNotificacion(resultado.mensaje, resultado.ok ? "exito" : "error");
+    };
 
     const visiblePlants = plantas.filter((plant) =>
         (plant.name || "").toLowerCase().includes(search.toLowerCase())
     );
+
     return (
         <main className="catalogo-container">
             {loading && <p className="catalogo-status">Cargando productos...</p>}
@@ -73,44 +75,46 @@ const Catalogo = ({ search = "" }) => {
                     const agotado = planta.stock <= 0;
                     const esFav = FavoritoService.esFavorito(planta.id);
 
-                    return(
+                    return (
                         <div
                             key={planta.id}
                             className="store-container"
                             onClick={() => navigate(`/producto/${planta.id}`)}
                             style={{ cursor: 'pointer' }}
                         >
-
-                            <div style={{position: 'relative'}}>
+                            <div style={{ position: 'relative' }}>
                                 <img
-                                    src={planta.image}
+                                    src={resolverImagen(planta.image)}
                                     alt={planta.name}
-                                    style={agotado ? {filter: 'grayscale(100%)'} : {}}
-                                /><span
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleToggleFavorito(planta.id);
-                                }}
-                                style={{
-                                    position: 'absolute',
-                                    top: '10px',
-                                    right: '10px',
-                                    fontSize: '1.5rem',
-                                    cursor: 'pointer',
-                                    filter: 'drop-shadow(0 0 2px white)'
-                                }}
-                            >
-                                {esFav ? "❤️" : "🤍"}
-                            </span>
-                                {agotado && <span style={{position: 'absolute', top: '10px', right: '10px', background: 'red', color: 'white', padding: '5px', borderRadius: '5px', fontSize: '0.8rem'}}>AGOTADO</span>}
+                                    style={agotado ? { filter: 'grayscale(100%)' } : {}}
+                                />
+                                <span
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleToggleFavorito(planta.id);
+                                    }}
+                                    style={{
+                                        position: 'absolute', top: '10px', right: '10px',
+                                        fontSize: '1.5rem', cursor: 'pointer',
+                                        filter: 'drop-shadow(0 0 2px white)'
+                                    }}
+                                >
+                                    {esFav ? "❤️" : "🤍"}
+                                </span>
+                                {agotado && (
+                                    <span style={{
+                                        position: 'absolute', top: '10px', right: '10px',
+                                        background: 'red', color: 'white', padding: '5px',
+                                        borderRadius: '5px', fontSize: '0.8rem'
+                                    }}>AGOTADO</span>
+                                )}
                             </div>
 
                             <div className="content">
                                 <h3>{planta.name}</h3>
                                 <p>{planta.description}</p>
                                 <p><strong>${Number(planta.price || 0).toLocaleString('es-CL')}</strong></p>
-
-                                {!agotado && <p style={{fontSize: '0.8rem', color: '#666'}}>Stock: {planta.stock}</p>}
+                                {!agotado && <p style={{ fontSize: '0.8rem', color: '#666' }}>Stock: {planta.stock}</p>}
 
                                 <button
                                     type="button"
@@ -120,7 +124,7 @@ const Catalogo = ({ search = "" }) => {
                                         e.stopPropagation();
                                         anadirAlCarrito(planta);
                                     }}
-                                    style={agotado ? {backgroundColor: '#ccc', cursor: 'not-allowed'} : {}}
+                                    style={agotado ? { backgroundColor: '#ccc', cursor: 'not-allowed' } : {}}
                                 >
                                     {agotado ? "Sin Stock" : "Añadir al carrito"}
                                 </button>
@@ -132,4 +136,5 @@ const Catalogo = ({ search = "" }) => {
         </main>
     );
 };
+
 export default Catalogo;
