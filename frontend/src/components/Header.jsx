@@ -62,6 +62,15 @@ const Header = ({search, setSearch}) => {
                     </>
                 )}
                 {isAdmin && (
+                <>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/home")}
+                        style={{ fontSize: "0.8rem", padding: "6px 10px", cursor: "pointer", marginRight: "6px" }}
+                    >
+                        Home
+                    </button>
+
                     <button
                         type="button"
                         onClick={() => navigate("/admin")}
@@ -69,7 +78,8 @@ const Header = ({search, setSearch}) => {
                     >
                         Admin
                     </button>
-                )}
+                </>
+            )}
                 <div className="perfil-contenedor" style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             {usuario ? (
             <>
