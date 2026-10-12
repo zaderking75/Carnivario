@@ -1,5 +1,8 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
+import duocuc.cl.rodrigo.carniverocrud.messaging.EventPublisher;
+import duocuc.cl.rodrigo.carniverocrud.messaging.PedidoConfirmadoEvent;
+import duocuc.cl.rodrigo.carniverocrud.messaging.RabbitConfig;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Detalle_Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
@@ -9,7 +12,9 @@ import duocuc.cl.rodrigo.carniverocrud.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +25,7 @@ public class CheckoutService {
     @Autowired private DetalleCompraJpaRepository detalleCompraJpaRepository;
     @Autowired private PlantaJpaRepository plantaJpaRepository;
     @Autowired private UsuarioJpaRepository usuarioJpaRepository;
-    @Autowired private EmailService emailService;
+    @Autowired private EventPublisher eventPublisher;
 
     @Transactional
     public Compra procesarCheckout(String emailUsuarioAutenticado, CheckoutRequest request) {
@@ -71,13 +76,28 @@ public class CheckoutService {
         compra = compraJpaRepository.save(compra);
 
         // 4. Enviar correo de confirmación (si falla, no revierte la compra — se loguea aparte)
-        try {
-            emailService.enviarConfirmacionCompra(usuario.getEmail(), compra, detallesGuardados, plantasCompradas, total);
-        } catch (Exception e) {
-            // No relanzamos: que falle el correo no debe revertir una compra ya válida
-            System.err.println("No se pudo enviar el correo de confirmación: " + e.getMessage());
-        }
+        // 4. Publicar el evento DESPUÉS del commit. Si la transacción falla, no sale ningún mensaje.
+        PedidoConfirmadoEvent evento = construirEvento(usuario.getEmail(), compra,
+        detallesGuardados, plantasCompradas, total);
 
-        return compra;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        @Override
+        public void afterCommit() {
+        eventPublisher.publicar(RabbitConfig.RK_PEDIDO_CONFIRMADO, evento);
     }
+});
+return compra;
+}
+private PedidoConfirmadoEvent construirEvento(String email, Compra compra,List<Detalle_Compra> detalles, List<Planta> plantas, int total) {
+    List<PedidoConfirmadoEvent.Item> items = new ArrayList<>();
+    for (int i = 0; i < detalles.size(); i++) {
+        Detalle_Compra d = detalles.get(i);
+        items.add(new PedidoConfirmadoEvent.Item(
+                plantas.get(i).getName(), d.getCantidad(), d.getCantidad() * d.getPrecio()));
+    }
+    return new PedidoConfirmadoEvent(
+            compra.getId(), email,
+            compra.getPurchasedate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+            compra.getEstado(), total, items);
+}
 }
