@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionSynchronization;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -86,7 +87,7 @@ public class CheckoutService {
         eventPublisher.publicar(RabbitConfig.RK_PEDIDO_CONFIRMADO, evento);
     }
 });
-return compra;
+return compra;  
 }
 private PedidoConfirmadoEvent construirEvento(String email, Compra compra,List<Detalle_Compra> detalles, List<Planta> plantas, int total) {
     List<PedidoConfirmadoEvent.Item> items = new ArrayList<>();
