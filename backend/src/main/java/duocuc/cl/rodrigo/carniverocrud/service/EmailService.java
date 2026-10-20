@@ -20,8 +20,20 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void enviarConfirmacionCompra(PedidoConfirmadoEvent e) {
+        String asunto;
+        String encabezado;
+        if ("PENDIENTE".equals(e.estado())) {
+            asunto = "Pedido recibido #" + e.compraId() + " - Carnivario";
+            encabezado = "Hemos recibido tu pedido. Está pendiente y todavía no está confirmado.\n\n";
+        } else if ("COMPLETADA".equals(e.estado())) {
+            asunto = "Confirmación de compra #" + e.compraId() + " - Carnivario";
+            encabezado = "¡Gracias por tu compra en Carnivario!\n\nTu compra está confirmada y completada.\n\n";
+        } else {
+            throw new IllegalArgumentException("Estado de pedido no soportado");
+        }
+
         StringBuilder cuerpo = new StringBuilder();
-        cuerpo.append("¡Gracias por tu compra en Carnivario!\n\n");
+        cuerpo.append(encabezado);
         cuerpo.append("Pedido N°: ").append(e.compraId()).append("\n");
         cuerpo.append("Fecha: ").append(e.fecha()).append("\n\n");
         cuerpo.append("Detalle:\n");
@@ -36,7 +48,7 @@ public class EmailService {
 
         SimpleMailMessage mensaje = new SimpleMailMessage();
         mensaje.setTo(e.emailCliente());
-        mensaje.setSubject("Confirmación de compra #" + e.compraId() + " - Carnivario");
+        mensaje.setSubject(asunto);
         mensaje.setText(cuerpo.toString());
 
         mailSender.send(mensaje);

@@ -36,28 +36,38 @@ public class EventPublisher {
     }
     public void publicarPedidoConfirmado(String emailCliente, Compra compra,
                                      List<Detalle_Compra> detalles, List<Planta> plantas, int total) {
-    try {
-        List<PedidoConfirmadoEvent.Item> items = new ArrayList<>();
-        for (int i = 0; i < detalles.size(); i++) {
-            Detalle_Compra d = detalles.get(i);
-            items.add(new PedidoConfirmadoEvent.Item(
-                    plantas.get(i).getName(), d.getCantidad(), d.getCantidad() * d.getPrecio()));
-        }
-
-        PedidoConfirmadoEvent evento = new PedidoConfirmadoEvent(
-                compra.getId(),
-                emailCliente,
-                compra.getPurchasedate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
-                compra.getEstado(),
-                total,
-                items);
-
-        publicarTrasCommit(RabbitConfig.RK_PEDIDO_CONFIRMADO, evento);
-    } catch (Exception e) {
-        // Un problema de mensajería nunca debe revertir una compra ya válida.
-        log.error("No se pudo preparar el evento de pedido confirmado: {}", e.getMessage());
+        publicarPedido(RabbitConfig.RK_PEDIDO_CONFIRMADO, emailCliente, compra, detalles, plantas, total);
     }
-}
+
+    public void publicarPedidoPendiente(String emailCliente, Compra compra,
+                                       List<Detalle_Compra> detalles, List<Planta> plantas, int total) {
+        publicarPedido(RabbitConfig.RK_PEDIDO_PENDIENTE, emailCliente, compra, detalles, plantas, total);
+    }
+
+    private void publicarPedido(String routingKey, String emailCliente, Compra compra,
+                                List<Detalle_Compra> detalles, List<Planta> plantas, int total) {
+        try {
+            List<PedidoConfirmadoEvent.Item> items = new ArrayList<>();
+            for (int i = 0; i < detalles.size(); i++) {
+                Detalle_Compra d = detalles.get(i);
+                items.add(new PedidoConfirmadoEvent.Item(
+                        plantas.get(i).getName(), d.getCantidad(), d.getCantidad() * d.getPrecio()));
+            }
+
+            PedidoConfirmadoEvent evento = new PedidoConfirmadoEvent(
+                    compra.getId(),
+                    emailCliente,
+                    compra.getPurchasedate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                    compra.getEstado(),
+                    total,
+                    items);
+
+            publicarTrasCommit(routingKey, evento);
+        } catch (Exception e) {
+            // Un problema de mensajería nunca debe revertir una compra ya válida.
+            log.error("No se pudo preparar el evento de pedido '{}': {}", routingKey, e.getMessage());
+        }
+    }
 
     private void publicarTrasCommit(String routingKey, Object evento) {
         if (TransactionSynchronizationManager.isSynchronizationActive()) {

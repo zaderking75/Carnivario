@@ -95,7 +95,7 @@ public class CompraService {
 
         // 4. Enviar el correo
         try {
-            eventPublisher.publicarPedidoConfirmado(emailDestino, compraGuardada, listaDetalles, plantasCompradas, totalCompra);
+            eventPublisher.publicarPedidoPendiente(emailDestino, compraGuardada, listaDetalles, plantasCompradas, totalCompra);
         } catch (Exception e) {
             System.err.println("Error enviando correo: " + e.getMessage());
         }
