@@ -6,6 +6,19 @@ jwt:
   expiration: 86400
 
 spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 1
+        default-requeue-rejected: false
+        retry:
+          enabled: false
+
   config:
     import: optional:file:.env[.properties]
 

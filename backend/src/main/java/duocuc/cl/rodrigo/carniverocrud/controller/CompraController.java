@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.request.CompraRequest;
 import duocuc.cl.rodrigo.carniverocrud.service.CompraService;
 import duocuc.cl.rodrigo.carniverocrud.service.EmailService;
@@ -23,8 +22,6 @@ import duocuc.cl.rodrigo.carniverocrud.service.EmailService;
 public class CompraController {
     @Autowired
     private CompraService compraService;
-    @Autowired
-    private EmailService emailService;
 
     @PostMapping
     public ResponseEntity<?> createPurchase(@RequestBody CompraRequest request, Authentication authentication) {

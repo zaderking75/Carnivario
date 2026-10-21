@@ -6,6 +6,31 @@
 !frontend/.env.production
 !frontend/.env.development
 **/backend.env
+**/*.env
+**/id_rsa
+**/id_dsa
+**/id_ecdsa
+**/id_ed25519
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+**/.aws/
+**/.ssh/
+
+# Generated artifacts (already tracked files remain in the index)
+**/target/
+/backend/bin/
+*.class
+*.jar
+*.war
+build/
+*.tmp
+*.bak
+*~
+hs_err_pid*
 
 logs
 *.log

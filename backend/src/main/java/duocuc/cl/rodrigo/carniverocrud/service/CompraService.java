@@ -1,5 +1,6 @@
 package duocuc.cl.rodrigo.carniverocrud.service;
 
+import duocuc.cl.rodrigo.carniverocrud.messaging.EventPublisher;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Detalle_Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
@@ -34,7 +35,7 @@ public class CompraService {
     @Autowired
     private UsuarioJpaRepository usuarioJpaRepository;
     @Autowired 
-    private EmailService emailService;
+    private EventPublisher eventPublisher;
 
     @Transactional
     public Map<String, Object> registerPurchase(CompraRequest request, Authentication authentication) {
@@ -94,7 +95,7 @@ public class CompraService {
 
         // 4. Enviar el correo
         try {
-            emailService.enviarConfirmacionCompra(emailDestino, compraGuardada, listaDetalles, plantasCompradas, totalCompra);
+            eventPublisher.publicarPedidoPendiente(emailDestino, compraGuardada, listaDetalles, plantasCompradas, totalCompra);
         } catch (Exception e) {
             System.err.println("Error enviando correo: " + e.getMessage());
         }
