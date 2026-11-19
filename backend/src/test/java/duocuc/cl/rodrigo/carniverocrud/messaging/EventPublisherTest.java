@@ -33,7 +33,7 @@ class EventPublisherTest {
     @BeforeEach
     void setUp() {
         rabbitTemplate = mock(RabbitTemplate.class);
-        publisher = new EventPublisher(rabbitTemplate);
+        publisher = new EventPublisher(rabbitTemplate, mock(KafkaEventPublisher.class));
     }
 
     @ParameterizedTest

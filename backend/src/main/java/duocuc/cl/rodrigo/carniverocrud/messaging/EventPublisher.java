@@ -21,9 +21,11 @@ public class EventPublisher {
 
     private static final Logger log = LoggerFactory.getLogger(EventPublisher.class);
     private final RabbitTemplate rabbitTemplate;
+    private final KafkaEventPublisher kafkaEventPublisher;
 
-    public EventPublisher(RabbitTemplate rabbitTemplate) {
+    public EventPublisher(RabbitTemplate rabbitTemplate,KafkaEventPublisher kafkaEventPublisher) {
         this.rabbitTemplate = rabbitTemplate;
+        this.kafkaEventPublisher = kafkaEventPublisher;
     }
 
     public void publicar(String routingKey, Object evento) {
@@ -62,7 +64,8 @@ public class EventPublisher {
                     total,
                     items);
 
-            publicarTrasCommit(routingKey, evento);
+            publicarTrasCommit(routingKey, evento); 
+            kafkaEventPublisher.publicarPedido(evento);
         } catch (Exception e) {
             // Un problema de mensajería nunca debe revertir una compra ya válida.
             log.error("No se pudo preparar el evento de pedido '{}': {}", routingKey, e.getMessage());
