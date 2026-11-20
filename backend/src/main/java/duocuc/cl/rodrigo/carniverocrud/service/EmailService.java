@@ -4,6 +4,7 @@ import duocuc.cl.rodrigo.carniverocrud.messaging.PedidoConfirmadoEvent;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Detalle_Compra;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
+import duocuc.cl.rodrigo.carniverocrud.restock.events.RestockNotification;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -18,6 +19,20 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    public void enviarAvisoReposicion(RestockNotification n) {
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setTo(n.email());
+        mensaje.setSubject("¡La planta " + n.plantName() + " volvió a estar disponible! - Carnivario");
+        mensaje.setText("¡Tenemos buenas noticias!\n\n"
+                + "La planta " + n.plantName() + " volvió a tener stock.\n"
+                + "Precio actual: $" + n.price() + "\n"
+                + "Unidades disponibles al momento del aviso: " + n.unitsAvailable() + "\n\n"
+                + "Visita Carnivario para revisar su disponibilidad.\n\n"
+                + "Si ya no deseas recibir avisos de esta planta, puedes cancelar la alerta desde la tienda.\n\n"
+                + "Equipo Carnivario 🌿");
+        mailSender.send(mensaje);
+    }
 
     public void enviarConfirmacionCompra(PedidoConfirmadoEvent e) {
         String asunto;

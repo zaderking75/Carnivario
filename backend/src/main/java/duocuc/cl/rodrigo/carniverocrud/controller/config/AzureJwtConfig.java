@@ -6,12 +6,11 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.OAuth2Error;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,57 +20,59 @@ import java.util.List;
 public class AzureJwtConfig {
 
     @Bean
-    public Converter<Jwt, AbstractAuthenticationToken>
-    jwtAuthenticationConverter() {
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return new AzureAuthenticationConverter();
+    }
 
-        JwtGrantedAuthoritiesConverter scopeConverter =
-                new JwtGrantedAuthoritiesConverter();
+    public static class AzureAuthenticationConverter
+            implements Converter<Jwt, AbstractAuthenticationToken> {
 
-        scopeConverter.setAuthoritiesClaimName("scp");
-        scopeConverter.setAuthorityPrefix("SCOPE_");
+        private final JwtGrantedAuthoritiesConverter scopeConverter;
 
-        JwtAuthenticationConverter converter =
-                new JwtAuthenticationConverter();
+        public AzureAuthenticationConverter() {
+            this.scopeConverter = new JwtGrantedAuthoritiesConverter();
+            this.scopeConverter.setAuthoritiesClaimName("scp");
+            this.scopeConverter.setAuthorityPrefix("SCOPE_");
+        }
 
-        converter.setPrincipalClaimName("preferred_username");
+        @Override
+        public AbstractAuthenticationToken convert(Jwt jwt) {
 
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Collection<GrantedAuthority> authorities =
-                    new ArrayList<>();
+            Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-            Collection<GrantedAuthority> scopes =
-                    scopeConverter.convert(jwt);
+            // Obtener permisos desde el claim scp
+            Collection<GrantedAuthority> scopes = scopeConverter.convert(jwt);
 
             if (scopes != null) {
                 authorities.addAll(scopes);
             }
 
-            List<String> roles =
-                    jwt.getClaimAsStringList("roles");
+            // Obtener roles desde el claim roles
+            List<String> roles = jwt.getClaimAsStringList("roles");
 
             if (roles != null) {
                 roles.forEach(role ->
-                        authorities.add(
-                                new SimpleGrantedAuthority(
-                                        "ROLE_" + role
-                                )
-                        )
+                    authorities.add(
+                        new SimpleGrantedAuthority("ROLE_" + role)
+                    )
                 );
             }
 
-            return authorities;
-        });
-
-        return jwt -> {
+            // Obtener email del usuario
             String email = jwt.getClaimAsString("preferred_username");
+
             if (email == null || email.isBlank()) {
                 email = jwt.getClaimAsString("email");
             }
+
             if (email == null || email.isBlank()) {
-                throw new OAuth2AuthenticationException(new OAuth2Error("invalid_token"),
-                        "El token Microsoft no contiene un email de usuario");
+                throw new OAuth2AuthenticationException(
+                    new OAuth2Error("invalid_token"),
+                    "El token Microsoft no contiene un email de usuario"
+                );
             }
-            return new JwtAuthenticationToken(jwt, converter.convert(jwt).getAuthorities(), email);
-        };
+
+            return new JwtAuthenticationToken(jwt, authorities, email);
+        }
     }
 }

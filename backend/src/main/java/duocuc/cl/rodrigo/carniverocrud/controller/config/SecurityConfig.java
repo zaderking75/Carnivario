@@ -192,6 +192,10 @@ public class SecurityConfig {
                                 "/user/api/*/role"
                         ).hasRole("ADMIN")
 
+                        // ALERTAS DE REPOSICIÓN: cualquier usuario autenticado
+                        .requestMatchers(HttpMethod.POST, "/planta/api/*/alerta").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/planta/api/*/alerta").authenticated()
+
                         // ADMIN PLANTAS
                         .requestMatchers(
                                 HttpMethod.POST,
