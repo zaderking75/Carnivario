@@ -11,16 +11,23 @@ import org.springframework.web.server.ResponseStatusException;
 import duocuc.cl.rodrigo.carniverocrud.models.entity.Planta;
 import duocuc.cl.rodrigo.carniverocrud.models.request.PlantaRequest;
 import duocuc.cl.rodrigo.carniverocrud.repository.PlantaJpaRepository;
+import duocuc.cl.rodrigo.carniverocrud.restock.events.RestockEvent;
+import duocuc.cl.rodrigo.carniverocrud.restock.producer.RestockEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PlantaService {
     @Autowired
     private PlantaJpaRepository plantaJpaRepository;
 
+    @Autowired
+    private RestockEventPublisher restockEventPublisher;
+
     public PlantaJpaRepository getPlantaJpaRepository() {
         return plantaJpaRepository;
     }
 
+    @Transactional
     public Planta registerNewPlanta(PlantaRequest planta) {
         validatePlanta(planta);
 
@@ -40,6 +47,7 @@ public class PlantaService {
         return plantaJpaRepository.save(plantaDB);
     }
 
+    @Transactional
     public Planta addstockplanta(int stock, int plantaid) {
         if (stock == 0) {
             throw new IllegalArgumentException("La cantidad de ajuste no puede ser 0");
@@ -47,14 +55,21 @@ public class PlantaService {
 
         Planta planta = plantaJpaRepository.findById(plantaid)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Planta no encontrada con id: " + plantaid));
-        int nuevoStock = planta.getStock() + stock;
+        int stockAnterior = planta.getStock();
+        int nuevoStock = stockAnterior + stock;
         if (nuevoStock < 0) {
             throw new IllegalArgumentException("El stock final no puede ser negativo");
         }
         planta.setStock(nuevoStock);
-        return plantaJpaRepository.save(planta);
+        Planta guardada = plantaJpaRepository.save(planta);
+        if (stockAnterior == 0 && nuevoStock > 0) {
+            restockEventPublisher.publicarReposicion(RestockEvent.listed(
+                    guardada.getId(), guardada.getName(), guardada.getPrice(), nuevoStock));
+        }
+        return guardada;
     }
 
+    @Transactional
     public Planta updatePlanta(int id, PlantaRequest request) {
         validatePlanta(request);
 
@@ -65,6 +80,7 @@ public class PlantaService {
             throw new IllegalArgumentException("Planta ya existe");
         }
 
+        int stockAnterior = planta.getStock();
         planta.setName(request.getName());
         planta.setPrice(request.getPrice());
         planta.setDescription(request.getDescription());
@@ -72,7 +88,12 @@ public class PlantaService {
         planta.setPlanting(request.getPlanting());
         planta.setSize(request.getSize());
         planta.setStock(request.getStock());
-        return plantaJpaRepository.save(planta);
+        Planta guardada = plantaJpaRepository.save(planta);
+        if (stockAnterior == 0 && guardada.getStock() > 0) {
+            restockEventPublisher.publicarReposicion(RestockEvent.listed(
+                    guardada.getId(), guardada.getName(), guardada.getPrice(), guardada.getStock()));
+        }
+        return guardada;
     }
 
     public List<Planta> getAllPlantas() {

@@ -29,6 +29,27 @@ public class KafkaConfig {
         return TopicBuilder.name(TOPIC_PEDIDOS_DLT).partitions(3).replicas(1).build();
     }
 
+
+    @Bean
+    NewTopic restockRequestedTopic() {
+        return TopicBuilder.name("restock.requested").partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    NewTopic restockCancelledTopic() {
+        return TopicBuilder.name("restock.cancelled").partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    NewTopic plantListedTopic() {
+        return TopicBuilder.name("plant.listed").partitions(3).replicas(1).build();
+    }
+
+    @Bean
+    NewTopic restockNotificationDueTopic() {
+        return TopicBuilder.name("restock.notification.due").partitions(3).replicas(1).build();
+    }
+
     /**
      * 2 reintentos con 1 s de espera; si siguen fallando, el registro va al DLT.
      * Spring Boot aplica este handler a todos los @KafkaListener.
