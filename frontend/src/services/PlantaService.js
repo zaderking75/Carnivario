@@ -26,7 +26,14 @@ class PlantaService {
     addStock(id, stock) {
         return api.put(`${API_BASE_URL}/${id}/${stock}`);
     }
+        solicitarAlertaRestock(id) {
+        return api.post(`${API_BASE_URL}/${id}/alerta`);
+    }
 
+    cancelarAlertaRestock(id) {
+        return api.delete(`${API_BASE_URL}/${id}/alerta`);
+    }
+    
     uploadImage(file) {
         const formData = new FormData();
         formData.append("file", file);
