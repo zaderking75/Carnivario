@@ -21,7 +21,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","http://3.212.230.250","https://3-212-230-250.sslip.io"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173","http://3.212.230.250","https://3-212-230-250.sslip.io","https://23-22-122-190.sslip.io","http://23-22-122-190.sslip.io"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Local-Token"));
         configuration.setAllowCredentials(false);

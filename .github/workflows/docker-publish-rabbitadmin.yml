@@ -4,7 +4,6 @@ on:
   push:
     branches: [Develop, main, feature/auth-hibrida-msal-local, feature/ep3-rabbitmq-rabbitadmin]
   workflow_dispatch:
-
 permissions:
   contents: read
 

@@ -42,11 +42,11 @@ class HybridAuthenticationTests extends IsolatedAuthTest {
 
     @Test void publicCatalogAndPreflightWork() throws Exception {
         mvc.perform(get("/planta/api")).andExpect(status().isOk());
-        mvc.perform(options("/user/api/me").header("Origin", "https://3-212-230-250.sslip.io")
+        mvc.perform(options("/user/api/me").header("Origin", "https://23-22-122-190.sslip.io")
                         .header("Access-Control-Request-Method", "GET")
                         .header("Access-Control-Request-Headers", "Authorization,Content-Type,X-Local-Token"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "https://3-212-230-250.sslip.io"))
+                .andExpect(header().string("Access-Control-Allow-Origin", "https://23-22-122-190.sslip.io"))
                 .andExpect(header().doesNotExist("Access-Control-Allow-Credentials"));
     }
 

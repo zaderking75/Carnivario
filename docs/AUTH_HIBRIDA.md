@@ -71,7 +71,7 @@ Esta prueba crea una red, MySQL y backend temporales con contraseñas generadas.
 
 En la aplicación `169c9415-d7d0-4892-8ccf-965f3f1a0dde`, tenant `3b914fe6-6475-4be6-8639-9de64b6ba898`:
 
-1. Registrar plataforma SPA con `https://3-212-230-250.sslip.io` y, para desarrollo, `http://localhost:5173`.
+1. Registrar plataforma SPA con `https://23-22-122-190.sslip.io` y, para desarrollo, `http://localhost:5173`.
 2. Exponer `api://169c9415-d7d0-4892-8ccf-965f3f1a0dde` con `Carnivario.Read` y `Carnivario.Write`.
 3. Comprobar que la API emita access tokens v2 (`api.requestedAccessTokenVersion: 2`), coherentes con el issuer configurado.
 4. Crear/asignar App Roles `ADMIN` y `CLIENTE` a los usuarios de prueba y conceder el consentimiento necesario para los scopes.
@@ -81,13 +81,13 @@ El client secret del `.env` no sirve como acceso SSH ni como credencial AWS. La 
 
 ## Configuración pendiente en API Gateway
 
-API base: `https://sioife5g10.execute-api.us-east-1.amazonaws.com/Deploy`.
+API base: `https://4p25pzzpq0.execute-api.us-east-1.amazonaws.com/Deploy`.
 
 Aplicar estos cambios **después de comprobar que el nuevo backend protege sus rutas**:
 
 | Configuración | Valor |
 | --- | --- |
-| CORS origins | `https://3-212-230-250.sslip.io`, opcionalmente el HTTP de transición |
+| CORS origins | `https://23-22-122-190.sslip.io`, opcionalmente el HTTP de transición |
 | CORS methods | GET, POST, PUT, DELETE, OPTIONS |
 | CORS headers | Authorization, Content-Type, X-Local-Token |
 | Credentials | OFF |
@@ -159,7 +159,7 @@ El script monta `/etc/letsencrypt` como solo lectura, valida Nginx antes del cam
 
 ## Verificación final en la infraestructura
 
-1. Abrir `https://3-212-230-250.sslip.io`: catálogo e imágenes visibles; solicitudes API a Gateway HTTPS.
+1. Abrir `https://23-22-122-190.sslip.io`: catálogo e imágenes visibles; solicitudes API a Gateway HTTPS.
 2. Login local CLIENTE y ADMIN: comprobar `X-Local-Token`, perfil, compra y operaciones administrativas.
 3. Login Microsoft: comprobar redirect a Microsoft y regreso al frontend HTTPS; ninguna llamada a `/oauth2/authorization/azure`.
 4. En Network, comprobar Bearer access token Azure, sin copiar el token a capturas.
