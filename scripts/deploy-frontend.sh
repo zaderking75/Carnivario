@@ -6,7 +6,7 @@ umask 077
 image=${1:?Indica la imagen del frontend}
 name=carnivero
 backup="${name}-old-$(date +%Y%m%d%H%M%S)"
-domain=3-212-230-250.sslip.io
+domain=100-57-140-25.sslip.io
 previous=false
 replacing=false
 
