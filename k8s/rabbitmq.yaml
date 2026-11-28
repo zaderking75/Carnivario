@@ -108,7 +108,6 @@ spec:
         runAsGroup: 999
         fsGroup: 999
         fsGroupChangePolicy: OnRootMismatch
-        fsGroupChangePolicy: OnRootMismatch
       affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
