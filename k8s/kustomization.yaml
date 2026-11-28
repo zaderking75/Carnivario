@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: carnivario
+resources:
+  - rabbitmq.yaml
+  - rabbitadmin.yaml
+images:
+  - name: carnivario-rabbitadmin
+    newName: voodoooq/carnivario-rabbitadmin
+    newTag: latest

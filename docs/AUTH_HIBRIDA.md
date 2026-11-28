@@ -81,7 +81,7 @@ El client secret del `.env` no sirve como acceso SSH ni como credencial AWS. La 
 
 ## Configuración pendiente en API Gateway
 
-API base: `https://sioife5g10.execute-api.us-east-1.amazonaws.com/Deploy`.
+API base: `https://fyfecie7ie.execute-api.us-east-1.amazonaws.com/Deploy`.
 
 Aplicar estos cambios **después de comprobar que el nuevo backend protege sus rutas**:
 
